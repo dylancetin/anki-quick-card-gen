@@ -1,14 +1,47 @@
-import * as React from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useState } from "react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUpload } from "@/components/custom-ui/file";
+import { ManagePDFDash } from "@/components/dash/pdf-manage";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: HomeComponent,
-})
+});
+
+type Tabs = "upload" | "inspect";
 
 function HomeComponent() {
+  const [activeTab, setActiveTab] = useState<Tabs>("upload");
+  const [file, setFile] = useState<File | undefined>(undefined);
+
+  useEffect(() => {
+    if (file) {
+      setActiveTab("inspect");
+    }
+  }, [file]);
+
   return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
+    <div className="p-4">
+      <Tabs value={activeTab}>
+        <TabsContent value="upload" className="mt-0">
+          <h1 className="text-2xl font-semibold"></h1>
+          <Card>
+            <CardHeader>
+              <CardTitle>Bir pdf yükleyerek başla</CardTitle>
+              <FileUpload
+                value={file}
+                valueOnChange={setFile}
+                accept="application/pdf"
+              />
+            </CardHeader>
+          </Card>
+        </TabsContent>
+        <TabsContent value="inspect">
+          <ManagePDFDash file={file} />
+        </TabsContent>
+      </Tabs>
     </div>
-  )
+  );
 }
