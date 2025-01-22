@@ -1,13 +1,14 @@
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { FieldError, useForm } from "react-hook-form";
 import {
   Sheet,
   SheetTitle,
@@ -29,6 +30,7 @@ import {
   globalSettingsSchema,
   useGlobalSettingsState,
 } from "@/components/global-settings";
+import { toast } from "sonner";
 
 export function EditOpenAIConfig() {
   const [open, setOpen] = useState(false);
@@ -61,6 +63,7 @@ export function EditOpenAIConfig() {
 }
 
 function SettingsForm({ closeTab }: { closeTab: () => void }) {
+  "use no memo";
   const [settingsValue, setSettingsValue] = useGlobalSettingsState();
   const form = useForm<GlobalSettings>({
     resolver: zodResolver(globalSettingsSchema),
@@ -76,6 +79,12 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
           },
           (e) => {
             console.log(e);
+            for (const field in e) {
+              // @ts-ignore
+              const v = e[field] as FieldError | undefined;
+              if (!v) continue;
+              if (v?.message) toast.error(`${field} ${v.message}`);
+            }
           },
         )}
         className="space-y-4 mt-8"
@@ -87,10 +96,22 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
             <FormItem>
               <FormLabel>Open-AI API Anahtarı</FormLabel>
               <FormControl>
-                <FormControl>
-                  <Input {...field} className="w-full" />
-                </FormControl>
+                <Input {...field} className="w-full" />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="baseUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Open-AI Base URL</FormLabel>
+              <FormControl>
+                <Input {...field} className="w-full" />
+              </FormControl>
+              <FormDescription>OpenAi api uyumlu api url</FormDescription>
               <FormMessage />
             </FormItem>
           )}

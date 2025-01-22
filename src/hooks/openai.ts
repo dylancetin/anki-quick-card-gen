@@ -12,6 +12,7 @@ export const useOpenAi = () => {
     return createOpenAI({
       compatibility: "strict",
       apiKey: value.key,
+      baseURL: value.baseUrl,
     });
   }, [value.key]);
   return openAi;

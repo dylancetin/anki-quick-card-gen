@@ -12,9 +12,15 @@ import { toast } from "sonner";
 
 export const globalSettingsSchema = z.object({
   key: z.string().optional(),
+  baseUrl: z.string().url().max(4).optional(),
 });
 
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
+
+const defSettings = {
+  key: "SET_YOUR_KEY_NOW",
+  baseUrl: "https://api.openai.com/v1",
+};
 
 const GlobalSettingsStateContext = createContext<
   [GlobalSettings, Dispatch<SetStateAction<GlobalSettings>>] | undefined
@@ -29,9 +35,7 @@ export function GlobalSettingsStateProvider({
     const savedSettings = localStorage.getItem("settings");
 
     if (savedSettings === null) {
-      return {
-        key: "SET_YOUR_KEY_NOW",
-      };
+      return defSettings;
     }
 
     const parsedSettings = globalSettingsSchema.safeParse(
@@ -44,9 +48,7 @@ export function GlobalSettingsStateProvider({
 
     toast.error("Ayarlar yüklenirken bir hata oluştu");
 
-    return {
-      key: "SET_YOUR_KEY_NOW",
-    };
+    return defSettings;
   });
 
   useEffect(() => {
