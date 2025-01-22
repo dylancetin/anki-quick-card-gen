@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 export const globalSettingsSchema = z.object({
   key: z.string().optional(),
-  baseUrl: z.string().url().max(4).optional(),
+  baseUrl: z.string().url().optional(),
 });
 
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
