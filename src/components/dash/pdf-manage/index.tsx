@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
+import { ActionsPanel } from "./action-panel";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
@@ -82,7 +83,7 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
   if (!file) return null;
 
   return (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col items-center w-full min-w-fit">
         <div className="border rounded-sm max-h-[800px] overflow-hidden mx-auto w-full max-w-fit relative">
           {loading && (
@@ -105,7 +106,9 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
           </Button>
         </div>
       </div>
-      <div className="w-full"></div>
+      <div className="w-full">
+        <ActionsPanel pdfDoc={pdfDoc} currentPage={currentPage} />
+      </div>
     </div>
   );
 }

@@ -2,27 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-
-const openai = createOpenAI({
-  // custom settings, e.g.
-  compatibility: "strict", // strict mode, enable when using the OpenAI API
-  apiKey: "",
-});
+import { useOpenAi } from "@/hooks/openai";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
   currentPage: number;
 }
 
-export default function ActionsPanel({
-  pdfDoc,
-  currentPage,
-}: ActionsPanelProps) {
+export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [summary, setSummary] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const openai = useOpenAi();
 
   const extractTextFromPage = async () => {
     if (!pdfDoc) return;

@@ -15,7 +15,7 @@ export function FileUpload({
   value,
   valueOnChange,
   accept = "*",
-  maxSize = 5 * 1024 * 1024,
+  maxSize = 500 * 1024 * 1024,
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
