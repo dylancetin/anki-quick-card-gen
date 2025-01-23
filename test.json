@@ -1,0 +1,124 @@
+// claude
+{
+  "cards": [
+    {
+      "type": "Basic",
+      "front": "Sitoplazma nedir?",
+      "back": "Hücre zarı ile çekirdek zarı arasında yer alan, hücre içindeki sıvı kısmıdır."
+    },
+    {
+      "type": "Cloze",
+      "content": "Sitoplazma; solunum, fotosentez, beslenme, sindirim, boşaltım gibi bütün yaşamsal faaliyetlerin geçtigi yerdir. Bu olaylar ile ilgili tepkimeler {{c1::sitoplazmanın}} sıvı kısmına dağılmış enzimler tarafından yapılır."
+    },
+    {
+      "type": "Type-in",
+      "front": "Hücre içindeki en küçük organel nedir?",
+      "back": "Ribozom"
+    },
+    {
+      "type": "Basic",
+      "front": "Ribozomun görevi nedir?",
+      "back": "Hücre içi protein sentezidir."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozom, hücre içinde {{c1::protein}} sentezleyen en küçük organeldir."
+    },
+    {
+      "type": "Basic",
+      "front": "Ribozomun yapısında ne kadar rRNA bulunur?",
+      "back": "Yaklaşık %65."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozom, zar sıfır bir organel olup, sitoplazmada serbest veya {{c1::endoplazmik retikulum}}'a bağlı olarak bulunabilir."
+    },
+    {
+      "type": "Type-in",
+      "front": "Hücre iskeletinin görevi nedir?",
+      "back": "Hücreye şekil vermek ve destek sağlamak."
+    }
+  ]
+}
+// deepseek
+{
+  "cards": [
+    {
+      "type": "Basic",
+      "front": "Sitoplazma nedir?",
+      "back": "Sitoplazma; çekirdek zarı ile hücre zarı arasını dolduran, yumurta akı kıvamında, yarı akışkan (kolloidal) bir yapıdır."
+    },
+    {
+      "type": "Cloze",
+      "content": "Sitoplazma; {{c1::solunum}}, {{c2::fotosentez}}, {{c3::beslenme}}, {{c4::sindirim}}, {{c5::boşaltım}} gibi bütün yaşamsal faaliyetlerin geçtiği yerdir."
+    },
+    {
+      "type": "Cloze",
+      "content": "Sitoplazmanın büyük bir kısmı ({{c1::%60-80}} arası) sudan oluşur ve hücreler yaşlandıkça su oranı azalır."
+    },
+    {
+      "type": "Basic",
+      "front": "Organel nedir?",
+      "back": "Organel; sitoplazma içinde belirli görevler yapmak üzere özelleşmiş yapılara denir."
+    },
+    {
+      "type": "Cloze",
+      "content": "Organeller; {{c1::ribozom}}, {{c2::endoplazmik retikulum}}, {{c3::golgi aygıtı}}, {{c4::lizozom}}, {{c5::mitokondri}}, {{c6::koful}}, {{c7::sentrozom}}, {{c8::plastitler}} şeklinde sıralanabilir."
+    },
+    {
+      "type": "Basic",
+      "front": "Ribozomun görevi nedir?",
+      "back": "Ribozomlar hücre içi protein sentezler."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozomlar hücre içindeki en küçük organeldir ve {{c1::zarsız}} bir yapıya sahiptir."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozomun yaklaşık {{c1::%65}} kadarı rRNA, geri kalan {{c2::%35}}'lik bir kısmı ise ribozomal proteinlerden oluşur."
+    }
+  ]
+}
+// gpt4o-mini
+{
+  "cards": [
+    {
+      "type": "Basic",
+      "front": "Sitoplazma nedir?",
+      "back": "Hücre zarı ile çekirdek zarı arasında yer alan, hücre içindeki sıvı kısmıdır."
+    },
+    {
+      "type": "Cloze",
+      "content": "Sitoplazma; solunum, fotosentez, beslenme, sindirim, boşaltım gibi bütün yaşamsal faaliyetlerin geçtigi yerdir. Bu olaylar ile ilgili tepkimeler {{c1::sitoplazmanın}} sıvı kısmına dağılmış enzimler tarafından yapılır."
+    },
+    {
+      "type": "Type-in",
+      "front": "Hücre içindeki en küçük organel nedir?",
+      "back": "Ribozom"
+    },
+    {
+      "type": "Basic",
+      "front": "Ribozomun görevi nedir?",
+      "back": "Hücre içi protein sentezidir."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozom, hücre içinde {{c1::protein}} sentezleyen en küçük organeldir."
+    },
+    {
+      "type": "Basic",
+      "front": "Ribozomun yapısında ne kadar rRNA bulunur?",
+      "back": "Yaklaşık %65."
+    },
+    {
+      "type": "Cloze",
+      "content": "Ribozom, zar sıfır bir organel olup, sitoplazmada serbest veya {{c1::endoplazmik retikulum}}'a bağlı olarak bulunabilir."
+    },
+    {
+      "type": "Type-in",
+      "front": "Hücre iskeletinin görevi nedir?",
+      "back": "Hücreye şekil vermek ve destek sağlamak."
+    }
+  ]
+}

@@ -12,7 +12,9 @@ import { toast } from "sonner";
 
 export const globalSettingsSchema = z.object({
   key: z.string().optional(),
-  baseUrl: z.string().url().optional(),
+  baseUrl: z.string().optional(),
+  model: z.string().optional(),
+  lang: z.enum(["TÜRKÇE", "ENGLISH"]).optional(),
 });
 
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
@@ -20,6 +22,8 @@ export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
 const defSettings = {
   key: "SET_YOUR_KEY_NOW",
   baseUrl: "https://api.openai.com/v1",
+  model: "gpt-4o-mini",
+  lang: "TÜRKÇE" as const,
 };
 
 const GlobalSettingsStateContext = createContext<

@@ -23,6 +23,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { TooltipArrow } from "@radix-ui/react-tooltip";
 import { LucideSettings2 } from "lucide-react";
 import {
@@ -111,7 +119,62 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
               <FormControl>
                 <Input {...field} className="w-full" />
               </FormControl>
-              <FormDescription>OpenAi api uyumlu api url</FormDescription>
+              <FormDescription>
+                OpenAi api uyumlu api url(claude da destekli, "openrouter" da
+                yazabilirsiniz)
+                <br />
+                Örnek:
+                <ul>
+                  <li>openrouter</li>
+                  <li>https://api.anthropic.com/v1</li>
+                  <li>https://api.openai.com/v1</li>
+                </ul>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="model"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>LLM Model</FormLabel>
+              <FormControl>
+                <Input {...field} className="w-full" />
+              </FormControl>
+              <FormDescription>
+                Örnek: gpt-4o-mini (openai ve claude dışında denemedim büyük
+                ihtimal çalışmicak)
+                <br />
+                Örnek:
+                <ul>
+                  <li>deepseek/deepseek-chat</li>
+                  <li>claude-3-haiku-20240307</li>
+                  <li>gpt-4o-mini</li>
+                </ul>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lang"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cevap Dili</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bir dil seç" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="TÜRKÇE">Türkçe</SelectItem>
+                  <SelectItem value="ENGLISH">English</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
