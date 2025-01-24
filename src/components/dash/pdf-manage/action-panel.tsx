@@ -6,46 +6,101 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useModel } from "@/hooks/ai";
 import { toast } from "sonner";
 import { getPrompt, getSystemPrompt } from "@/lib/prompt";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useGlobalSettingsState } from "@/components/global-settings";
-import { AIAnkiCardSchema } from "@/lib/db";
+import { AIAnkiCard, AIAnkiCardSchema, db } from "@/lib/db";
+import { useMutation } from "@tanstack/react-query";
+import { errorAndSuccessToasts } from "@/lib/useMutationDefaultToasts";
+import { Switch } from "@/components/ui/switch";
+import { useImmer } from "use-immer";
+import { PreviewModal } from "./preview-dashboard";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
   currentPage: number;
 }
+const test = {
+  cards: [
+    {
+      type: "Basic",
+      front: "Sitoplazma nedir?",
+      back: "Hücre zarı ile çekirdek zarı arasında yer alan, hücre içindeki sıvı kısmıdır.",
+    },
+    {
+      type: "Cloze",
+      content:
+        "Sitoplazma; solunum, fotosentez, beslenme, sindirim, boşaltım gibi bütün yaşamsal faaliyetlerin geçtigi yerdir. Bu olaylar ile ilgili tepkimeler {{c1::sitoplazmanın}} sıvı kısmına dağılmış enzimler tarafından yapılır.",
+    },
+    {
+      type: "Type-in",
+      front: "Hücre içindeki en küçük organel nedir?",
+      back: "Ribozom",
+    },
+    {
+      type: "Basic",
+      front: "Ribozomun görevi nedir?",
+      back: "Hücre içi protein sentezidir.",
+    },
+    {
+      type: "Cloze",
+      content:
+        "Ribozom, hücre içinde {{c1::protein}} sentezleyen en küçük organeldir.",
+    },
+    {
+      type: "Basic",
+      front: "Ribozomun yapısında ne kadar rRNA bulunur?",
+      back: "Yaklaşık %65.",
+    },
+    {
+      type: "Cloze",
+      content:
+        "Ribozom, zar sıfır bir organel olup, sitoplazmada serbest veya {{c1::endoplazmik retikulum}}'a bağlı olarak bulunabilir.",
+    },
+    {
+      type: "Type-in",
+      front: "Hücre iskeletinin görevi nedir?",
+      back: "Hücreye şekil vermek ve destek sağlamak.",
+    },
+  ],
+} satisfies AIAnkiCard;
 
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
-  const [summary, setSummary] = useState("");
-  const [loading, setLoading] = useState(false);
   const [includePreviousPageContext, setIncludePreviousPageContext] =
     useState(false);
   const [settings, _] = useGlobalSettingsState();
+  const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>(
+    Array.from({ length: 2 }, () => test.cards).flat(),
+  );
+  const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
 
-  const summarizePage = async () => {
-    setLoading(true);
-    try {
-      const { object } = await generateObject({
-        schema: AIAnkiCardSchema,
-        // @ts-ignore
-        model,
-        system: getSystemPrompt({ settings }),
-        prompt: await getPrompt({
-          includePreviousPageContext,
-          pdfDoc,
-          currentPage,
-        }),
-        experimental_providerMetadata: {},
-      });
-      setSummary(JSON.stringify(object));
-    } catch (error) {
-      console.error("Error summarizing page:", error);
-      setSummary("Error generating summary.");
-    }
-    setLoading(false);
-  };
+  const cardGenMutation = useMutation({
+    ...errorAndSuccessToasts,
+    mutationFn: async () => {
+      toast.loading("AI cevabı yükleniyor");
+      try {
+        const { object } = await generateObject({
+          schema: AIAnkiCardSchema,
+          // @ts-ignore
+          model,
+          system: getSystemPrompt({ settings }),
+          prompt: await getPrompt({
+            includePreviousPageContext,
+            pdfDoc,
+            currentPage,
+          }),
+        });
+        AIAnkiCardSchema.parse(object);
+        setPreviewCards((d) => {
+          d.push(...object.cards);
+        });
+
+        // db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
+      } catch (error) {
+        console.error("Error summarizing page:", error);
+      }
+    },
+  });
 
   async function convertPageToPNG() {
     if (!pdfDoc) return;
@@ -91,27 +146,44 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
 
   return (
     <Card>
+      <PreviewModal
+        open={openPreview}
+        setOpen={setOpenPreview}
+        previewCards={previewCards}
+        setPreviewCards={setPreviewCards}
+      />
       <CardHeader>
         <CardTitle>Actions</CardTitle>
       </CardHeader>
       <CardContent className="block space-y-4">
-        <Button onClick={summarizePage} disabled={loading}>
-          gönder
+        <Card>
+          <CardContent className="block space-y-4">
+            <div className="space-y-2">
+              <Label className="text-lg block">
+                Bir önceki sayfayı bağlama ekle
+              </Label>
+              <Switch
+                checked={includePreviousPageContext}
+                onCheckedChange={(e) =>
+                  setIncludePreviousPageContext(e as boolean)
+                }
+              />
+            </div>
+            <Button
+              onClick={() => cardGenMutation.mutate()}
+              disabled={cardGenMutation.isPending}
+            >
+              Mevcut sayfadan kart oluştur
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Button onClick={convertPageToPNG}>
+          Mevcut sayfayı foto olarak indir
         </Button>
-        <div className="space-x-2">
-          <Label>bi önceki sayfayı da ekle</Label>
-          <Checkbox
-            checked={includePreviousPageContext}
-            onCheckedChange={(e) => setIncludePreviousPageContext(e as boolean)}
-          />
-        </div>
-        <Button onClick={convertPageToPNG}>foto olarak indir</Button>
-        {summary && (
-          <div>
-            <h3 className="font-bold">Summary:</h3>
-            <p>{summary}</p>
-          </div>
-        )}
+        <Button onClick={() => setOpenPreview(true)}>
+          Önizleme tablosunu aç
+        </Button>
       </CardContent>
     </Card>
   );
