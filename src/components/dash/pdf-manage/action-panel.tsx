@@ -13,7 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { errorAndSuccessToasts } from "@/lib/useMutationDefaultToasts";
 import { Switch } from "@/components/ui/switch";
 import { useImmer } from "use-immer";
-import { PreviewModal } from "./preview-dashboard";
+import { AllCards, PreviewModal } from "./preview-dashboard";
 import Papa from "papaparse";
 import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
@@ -276,6 +276,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           </Button>
           <Button onClick={downloadAllCards}>Kartları indir</Button>
           <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
+          <AllCards />
         </div>
       </CardContent>
     </Card>

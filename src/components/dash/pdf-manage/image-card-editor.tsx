@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { db } from "@/lib/db";
+import { toast } from "sonner";
 
 interface PdfCanvasProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -218,6 +219,16 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
       db.images.add({ id: imageId, image: dataUrl });
       db.cards.add({ value: { type: "Image Occlusion", boxes, imageId } });
+      toast.success("Başarıyla kart oluşturuldu");
+      setBoxes([]);
+      setCrop({
+        unit: "%",
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+      });
+      setActiveTab("crop");
     };
     img.src = croppedImage;
   };

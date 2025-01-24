@@ -27,6 +27,7 @@ interface Props {
 }
 
 export const Datatable = ({ isLoading, table, columns }: Props) => {
+  "use no memo";
   return (
     <>
       {isLoading ? (
