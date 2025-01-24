@@ -17,6 +17,7 @@ import { PreviewModal } from "./preview-dashboard";
 import Papa from "papaparse";
 import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
+import JSZip from "jszip";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -154,18 +155,71 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
     console.log(allCards);
 
     // Convert the array of cards to CSV
-    const csv = Papa.unparse(allCards, {
-      header: false,
-    });
+    //
+    const neededImagIds: string[] = [];
+    const csv = Papa.unparse(
+      allCards.map((c) => {
+        switch (c.type) {
+          case "Basic": {
+            return [c.type, c.front, c.back];
+          }
+          case "Type-in": {
+            return [c.type, c.front, c.back];
+          }
+          case "Cloze": {
+            return [c.type, c.front];
+          }
+          case "Image Occlusion": {
+            neededImagIds.push(c.imageId);
+            return [
+              c.type,
+              c.boxes
+                .map(
+                  (b, i) =>
+                    `{{c${i + 1}::image-occlusion:rect:left=${b.x}:top=${b.y}:width=${b.width}:height=${b.height}:oi=1}}`,
+                )
+                .join(" "),
+              `<img src="${c.imageId}.webp">`,
+            ];
+          }
+        }
+      }),
+      {
+        header: false,
+      },
+    );
 
     // Create a blob from the CSV string
     const blob = new Blob([txtHead, csv], { type: "text/txt;charset=utf-8;" });
 
+    const zip = new JSZip();
+    zip.file("cards.txt", blob);
+
+    const imgFolder = zip.folder("images");
+
+    if (!imgFolder) {
+      console.error("sometgng went terribly wrong");
+      return;
+    }
+
+    await Promise.allSettled(
+      neededImagIds.map(async (imageId) => {
+        const imageData = await db.images.get(imageId);
+        if (!imageData) {
+          return;
+        }
+        imgFolder.file(`${imageId}.webp`, imageData.image.split(",")[1], {
+          base64: true,
+        });
+      }),
+    );
+
     // Create a link element
+    const zipBlob = await zip.generateAsync({ type: "blob" });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(zipBlob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "all_cards.txt"); // Set the desired file name
+    link.setAttribute("download", "all_cards.zip"); // Set the desired file name
 
     // Append to the body (required for Firefox)
     document.body.appendChild(link);

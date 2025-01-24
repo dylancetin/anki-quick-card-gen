@@ -1,0 +1,4 @@
+#separator:tab
+#html:true
+#tags column:6
+{{c1::image-occlusion:rect:left=.3862:top=.0036:width=.1963:height=.3283:oi=1}}<br>	"<img src=""paste-1deeb28c4eab3e25c19b4bbbba139400e0dfa4ba.jpg"">"				
