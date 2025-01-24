@@ -23,58 +23,12 @@ interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
   currentPage: number;
 }
-const test = {
-  cards: [
-    {
-      type: "Basic",
-      front: "Sitoplazma nedir?",
-      back: "Hücre zarı ile çekirdek zarı arasında yer alan, hücre içindeki sıvı kısmıdır.",
-    },
-    {
-      type: "Cloze",
-      front:
-        "Sitoplazma; solunum, fotosentez, beslenme, sindirim, boşaltım gibi bütün yaşamsal faaliyetlerin geçtigi yerdir. Bu olaylar ile ilgili tepkimeler {{c1::sitoplazmanın}} sıvı kısmına dağılmış enzimler tarafından yapılır.",
-    },
-    {
-      type: "Type-in",
-      front: "Hücre içindeki en küçük organel nedir?",
-      back: "Ribozom",
-    },
-    {
-      type: "Basic",
-      front: "Ribozomun görevi nedir?",
-      back: "Hücre içi protein sentezidir.",
-    },
-    {
-      type: "Cloze",
-      front:
-        "Ribozom, hücre içinde {{c1::protein}} sentezleyen en küçük organeldir.",
-    },
-    {
-      type: "Basic",
-      front: "Ribozomun yapısında ne kadar rRNA bulunur?",
-      back: "Yaklaşık %65.",
-    },
-    {
-      type: "Cloze",
-      front:
-        "Ribozom, zar sıfır bir organel olup, sitoplazmada serbest veya {{c1::endoplazmik retikulum}}'a bağlı olarak bulunabilir.",
-    },
-    {
-      type: "Type-in",
-      front: "Hücre iskeletinin görevi nedir?",
-      back: "Hücreye şekil vermek ve destek sağlamak.",
-    },
-  ],
-} satisfies AIAnkiCard;
 
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [includePreviousPageContext, setIncludePreviousPageContext] =
     useState(false);
   const [settings, _] = useGlobalSettingsState();
-  const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>(
-    Array.from({ length: 2 }, () => test.cards).flat(),
-  );
+  const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>([]);
   const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
 
