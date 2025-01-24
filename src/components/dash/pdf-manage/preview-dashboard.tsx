@@ -1,11 +1,5 @@
 import { AIAnkiCard, AnkiCard, db } from "@/lib/db";
-import {
-  useEffect,
-  useRef,
-  useMemo,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useRef, useMemo, type Dispatch, type SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

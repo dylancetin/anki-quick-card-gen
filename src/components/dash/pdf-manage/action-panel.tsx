@@ -35,7 +35,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const cardGenMutation = useMutation({
     ...errorAndSuccessToasts,
     mutationFn: async () => {
-      toast.loading("AI cevabı yükleniyor");
+      const toastId = toast.loading("AI cevabı yükleniyor");
       try {
         const { object } = await generateObject({
           schema: AIAnkiCardSchema,
@@ -52,9 +52,18 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         setPreviewCards((d) => {
           d.push(...object.cards);
         });
+        toast.success("AI Kartları yüklendi lütfen kartları onaylayın", {
+          id: toastId,
+          duration: 1000,
+        });
 
         // db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
       } catch (error) {
+        toast.error("AI Kartları yüklenirken bi sorun oluştu", {
+          id: toastId,
+          duration: 1000,
+        });
+
         console.error("Error summarizing page:", error);
       }
     },
