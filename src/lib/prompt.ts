@@ -23,7 +23,7 @@ Your job is simple, yet it is very important that you understand each step and p
 			Cloze card is more complicated. It hides a part of the text. There can be multiple clozes in a text. the number after "c" spesifies the number of cloze. It needs to start from 1 to as many as you put.
 			example: {
 				"type":"Cloze", // this is constant and is required
-				"content": "{{c1::Sitoplazmada}} besin dolaşımını, yağ ve hormon sentezini sağlayan, hücre zarı ve çekirdek zarı arasında yer almış tek zarlı bir sıra karışık kanallar sistemidir."
+				"front": "{{c1::Sitoplazmada}} besin dolaşımını, yağ ve hormon sentezini sağlayan, hücre zarı ve çekirdek zarı arasında yer almış tek zarlı bir sıra karışık kanallar sistemidir."
 			}
 	c. Type-in:
 			Type-in card is similar to basic but with a twist. Student needs to type in the answer. So these cards' answers needs to be short or tricky to write.

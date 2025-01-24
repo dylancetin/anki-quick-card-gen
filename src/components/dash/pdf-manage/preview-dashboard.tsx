@@ -29,28 +29,37 @@ import { Updater } from "use-immer";
 const renderStringWithHighlight = (str: string) => {
   const regex = /{{(c\d+)::(.*?)}}/g;
   const parts = str.split(regex);
-  return parts.map((part, index) => {
-    if (index % 3 === 0) {
-      return part; // Regular text
-    } else if (index % 3 === 1) {
-      return (
-        <Badge className="inline">{`${parts[index + 1]} (${part.replace("c", "")})`}</Badge>
-      ); // Highlighted text
-    }
-    return null; // Skip the second capturing group
-  });
+  return (
+    <span className="inline-flex gap-2">
+      {parts.map((part, index) => {
+        if (index % 3 === 0) {
+          return <span key={index}>part</span>; // Regular text
+        } else if (index % 3 === 1) {
+          return (
+            <Badge
+              className="inline"
+              key={index}
+            >{`${parts[index + 1]} (${part.replace("c", "")})`}</Badge>
+          ); // Highlighted text
+        }
+        return null; // Skip the second capturing group
+      })}
+    </span>
+  );
 };
 
-const renderTooltipContent = (content: ReactNode) => (
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <div className="truncate max-w-96 cursor-pointer">{content}</div>
-    </TooltipTrigger>
-    <TooltipContent className="max-w-96 text-wrap">
-      <p className="max-w-96 text-wrap">{content}</p>
-    </TooltipContent>
-  </Tooltip>
-);
+function RenderTooltipContent({ content }: { content: ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="truncate max-w-96 cursor-pointer">{content}</div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-96 text-wrap">
+        <p className="max-w-96 text-wrap">{content}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function PreviewModal({
   open,
@@ -76,18 +85,19 @@ export function PreviewModal({
       {
         header: "Ön-Yüz",
         cell: ({ row }) => {
-          if (row.original.type === "Basic") {
-            return renderTooltipContent(row.original.front);
+          if (
+            row.original.type === "Basic" ||
+            row.original.type === "Type-in"
+          ) {
+            return <RenderTooltipContent content={row.original.front} />;
           }
 
           if (row.original.type === "Cloze") {
-            return renderTooltipContent(
-              renderStringWithHighlight(row.original.content),
+            return (
+              <RenderTooltipContent
+                content={renderStringWithHighlight(row.original.front)}
+              />
             );
-          }
-
-          if (row.original.type === "Type-in") {
-            return renderTooltipContent(row.original.front);
           }
 
           return null;
@@ -96,7 +106,7 @@ export function PreviewModal({
       {
         accessorKey: "back",
         header: "Arka-Yüz",
-        cell: ({ getValue }) => renderTooltipContent(getValue()),
+        cell: ({ getValue }) => <RenderTooltipContent content={getValue()} />,
       },
       {
         header: "Aksiyonlar",

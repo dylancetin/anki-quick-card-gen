@@ -10,7 +10,7 @@ const BasicCardSchema = z.object({
 
 const ClozeCardSchema = z.object({
   type: z.literal("Cloze"),
-  content: z.string(),
+  front: z.string(),
 });
 
 const TypeInCardSchema = z.object({
@@ -21,8 +21,15 @@ const TypeInCardSchema = z.object({
 
 const ImageOcclusionCardSchema = z.object({
   type: z.literal("Image Occlusion"),
-  clozes: z.string(),
   imageId: z.string(),
+  boxes: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+      width: z.number(),
+      height: z.number(),
+    })
+    .array(),
 });
 
 export const AIAnkiCardSchema = z.object({
@@ -48,11 +55,19 @@ const db = new Dexie("Local-Fake-AnkiDB") as Dexie & {
     AnkiCard,
     "id" // primary key "id" (for the typings only)
   >;
+  images: EntityTable<
+    {
+      id: string;
+      image: string;
+    },
+    "id"
+  >;
 };
 
 // Schema declaration:
-db.version(1).stores({
+db.version(2).stores({
   cards: "++id", // primary key "id" (for the runtime!)
+  images: "id",
 });
 
 export type { AnkiCard };

@@ -124,12 +124,12 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
                 yazabilirsiniz)
                 <br />
                 Örnek:
-                <ul>
-                  <li>openrouter</li>
-                  <li>https://api.anthropic.com/v1</li>
-                  <li>https://api.openai.com/v1</li>
-                </ul>
               </FormDescription>
+              <ul>
+                <li>openrouter</li>
+                <li>https://api.anthropic.com/v1</li>
+                <li>https://api.openai.com/v1</li>
+              </ul>
               <FormMessage />
             </FormItem>
           )}
@@ -148,12 +148,12 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
                 ihtimal çalışmicak)
                 <br />
                 Örnek:
-                <ul>
-                  <li>deepseek/deepseek-chat</li>
-                  <li>claude-3-haiku-20240307</li>
-                  <li>gpt-4o-mini</li>
-                </ul>
               </FormDescription>
+              <ul>
+                <li>deepseek/deepseek-chat</li>
+                <li>claude-3-haiku-20240307</li>
+                <li>gpt-4o-mini</li>
+              </ul>
               <FormMessage />
             </FormItem>
           )}

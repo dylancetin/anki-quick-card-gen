@@ -8,12 +8,15 @@ import { toast } from "sonner";
 import { getPrompt, getSystemPrompt } from "@/lib/prompt";
 import { Label } from "@/components/ui/label";
 import { useGlobalSettingsState } from "@/components/global-settings";
-import { AIAnkiCard, AIAnkiCardSchema, db } from "@/lib/db";
+import { AIAnkiCard, AIAnkiCardSchema, AnkiCard, db } from "@/lib/db";
 import { useMutation } from "@tanstack/react-query";
 import { errorAndSuccessToasts } from "@/lib/useMutationDefaultToasts";
 import { Switch } from "@/components/ui/switch";
 import { useImmer } from "use-immer";
 import { PreviewModal } from "./preview-dashboard";
+import Papa from "papaparse";
+import { txtHead } from "@/lib/cardsTxtHead";
+import { PdfCanvasDialog } from "./image-card-editor";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -28,7 +31,7 @@ const test = {
     },
     {
       type: "Cloze",
-      content:
+      front:
         "Sitoplazma; solunum, fotosentez, beslenme, sindirim, boşaltım gibi bütün yaşamsal faaliyetlerin geçtigi yerdir. Bu olaylar ile ilgili tepkimeler {{c1::sitoplazmanın}} sıvı kısmına dağılmış enzimler tarafından yapılır.",
     },
     {
@@ -43,7 +46,7 @@ const test = {
     },
     {
       type: "Cloze",
-      content:
+      front:
         "Ribozom, hücre içinde {{c1::protein}} sentezleyen en küçük organeldir.",
     },
     {
@@ -53,7 +56,7 @@ const test = {
     },
     {
       type: "Cloze",
-      content:
+      front:
         "Ribozom, zar sıfır bir organel olup, sitoplazmada serbest veya {{c1::endoplazmik retikulum}}'a bağlı olarak bulunabilir.",
     },
     {
@@ -144,6 +147,37 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
     }
   }
 
+  async function downloadAllCards() {
+    const allCards: AnkiCard["value"][] = (await db.cards.toArray()).map(
+      (d) => d.value,
+    );
+    console.log(allCards);
+
+    // Convert the array of cards to CSV
+    const csv = Papa.unparse(allCards, {
+      header: false,
+    });
+
+    // Create a blob from the CSV string
+    const blob = new Blob([txtHead, csv], { type: "text/txt;charset=utf-8;" });
+
+    // Create a link element
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "all_cards.txt"); // Set the desired file name
+
+    // Append to the body (required for Firefox)
+    document.body.appendChild(link);
+
+    // Trigger the download
+    link.click();
+
+    // Clean up and remove the link
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <Card>
       <PreviewModal
@@ -152,6 +186,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         previewCards={previewCards}
         setPreviewCards={setPreviewCards}
       />
+
       <CardHeader>
         <CardTitle>Actions</CardTitle>
       </CardHeader>
@@ -178,12 +213,16 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           </CardContent>
         </Card>
 
-        <Button onClick={convertPageToPNG}>
-          Mevcut sayfayı foto olarak indir
-        </Button>
-        <Button onClick={() => setOpenPreview(true)}>
-          Önizleme tablosunu aç
-        </Button>
+        <div className="flex flex-wrap gap-4">
+          <Button onClick={convertPageToPNG}>
+            Mevcut sayfayı foto olarak indir
+          </Button>
+          <Button onClick={() => setOpenPreview(true)}>
+            Önizleme tablosunu aç
+          </Button>
+          <Button onClick={downloadAllCards}>Kartları indir</Button>
+          <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
+        </div>
       </CardContent>
     </Card>
   );
