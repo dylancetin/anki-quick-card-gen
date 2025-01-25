@@ -83,6 +83,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
       await page.render({ canvasContext: context, viewport }).promise;
       setOriginalImage(canvas.toDataURL());
+      canvas.remove();
     };
 
     renderPdf();
@@ -105,6 +106,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
     setCroppedImage(canvas.toDataURL());
     setActiveTab("annotate");
+    canvas.remove();
   };
 
   // Step 3: Box drawing logic
@@ -229,6 +231,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
         y: 0,
       });
       setActiveTab("crop");
+      canvas.remove();
     };
     img.src = croppedImage;
   };
