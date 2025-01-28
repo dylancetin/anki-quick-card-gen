@@ -125,6 +125,8 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
                 <br />
                 Örnek:
                 <br />
+                groq
+                <br />
                 openrouter
                 <br />
                 https://api.anthropic.com/v1

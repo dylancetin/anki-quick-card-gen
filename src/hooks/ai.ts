@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGroq } from "@ai-sdk/groq";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { useGlobalSettingsState } from "@/components/global-settings";
 import { useMemo } from "react";
@@ -44,6 +45,12 @@ export const useModel = () => {
         },
       })(value.model ?? "claude-3-haiku-20240307");
     }
+    if (value.baseUrl === "groq") {
+      return createGroq({
+        apiKey: value.key,
+      });
+    }
+
     return createOpenAI({
       compatibility: "compatible",
       apiKey: value.key,
