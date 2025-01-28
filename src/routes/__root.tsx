@@ -1,7 +1,6 @@
 import "@fontsource-variable/outfit";
 import "../globals.css";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import Logo from "@/components/logo";
 import { Toaster } from "@/components/ui/sonner";
 import { EditOpenAIConfig } from "@/components/dash/openai-settings";
@@ -28,7 +27,6 @@ function RootComponent() {
             </div>
           </header>
           <Outlet />
-          <TanStackRouterDevtools position="bottom-right" />
           <Toaster richColors />
         </TooltipProvider>
       </GlobalSettingsStateProvider>
