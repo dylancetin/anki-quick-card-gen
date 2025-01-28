@@ -62,7 +62,7 @@ export async function getPrompt({
     const fullText = textContent.items
       .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
       .map((item) => item.str) // Extract the string from each TextItem
-      .join(" "); // Join them with a space
+      .join("");
 
     return `<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`;
   };

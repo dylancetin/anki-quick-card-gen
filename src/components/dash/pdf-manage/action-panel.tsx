@@ -18,6 +18,7 @@ import Papa from "papaparse";
 import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
 import JSZip from "jszip";
+import { TextItem } from "pdfjs-dist/types/src/display/api";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -240,6 +241,22 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           <Button onClick={downloadAllCards}>Kartları indir</Button>
           <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
           <AllCards />
+          <Button
+            onClick={async () => {
+              const page = await pdfDoc!.getPage(currentPage);
+              const textContent = await page.getTextContent();
+              console.log(textContent);
+              const fullText = textContent.items
+                .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
+                .map((item) => item.str) // Extract the string from each TextItem
+                .join(""); // Join them with a space
+              console.log(page.commonObjs);
+
+              console.log(`<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`);
+            }}
+          >
+            Sayfa texti logla
+          </Button>
         </div>
       </CardContent>
     </Card>

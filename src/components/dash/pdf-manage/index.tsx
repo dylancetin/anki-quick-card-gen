@@ -4,7 +4,7 @@ import { LoaderCircle } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 import { ActionsPanel } from "./action-panel";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export function ManagePDFDash({ file }: { file: File | undefined }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,7 +17,14 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
     const loadPDF = async () => {
       try {
         const arrayBuffer = await file!.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        const pdf = await pdfjsLib.getDocument({
+          data: arrayBuffer,
+          cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
+          cMapPacked: true,
+          useSystemFonts: false,
+          disableFontFace: false,
+          fontExtraProperties: true, // Enable detailed font analysis
+        }).promise;
         setPdfDoc(pdf);
         setNumPages(pdf.numPages);
         setLoading(false);
