@@ -55,14 +55,14 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         });
         toast.success("AI Kartları yüklendi lütfen kartları onaylayın", {
           id: toastId,
-          duration: 1000,
+          duration: 4000,
         });
 
         // db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
       } catch (error) {
         toast.error("AI Kartları yüklenirken bi sorun oluştu", {
           id: toastId,
-          duration: 1000,
+          duration: 4000,
         });
 
         console.error("Error summarizing page:", error);
