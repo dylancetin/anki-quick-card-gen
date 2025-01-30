@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 import { ActionsPanel } from "./action-panel";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
@@ -105,9 +112,39 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
           <Button onClick={goToPreviousPage} disabled={currentPage === 1}>
             Önceki
           </Button>
-          <span className="self-center">
-            Sayfa {currentPage}/{numPages}
-          </span>
+          <Popover>
+            <PopoverTrigger>
+              <span className="self-center">
+                Sayfa {currentPage}/{numPages}
+              </span>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto space-y-4"
+              align="center"
+              side="top"
+            >
+              <div className="text-bw-600 text-xs ">Sayfa</div>
+              <Input
+                onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (event.key === "Enter") {
+                    const inputValue = event.currentTarget.value;
+                    if (inputValue) {
+                      const page = Number(inputValue) - 1; // Sayfa indeksi 0'dan başladığı için 1 çıkarıyoruz
+                      if (page <= (numPages ?? 1)) {
+                        setCurrentPage(page);
+                      } else {
+                        toast.error("Sayfa bulunamadı", {
+                          description: `Girilen sayfa mevcut sayfa sayısından (${numPages}) daha büyük olamaz.`,
+                          duration: 2500,
+                        });
+                      }
+                    }
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+
           <Button onClick={goToNextPage} disabled={currentPage === numPages}>
             Sonraki
           </Button>
