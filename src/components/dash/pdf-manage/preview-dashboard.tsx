@@ -300,7 +300,7 @@ const allCardsColumns: ColumnDef<AnkiCard>[] = [
 
 export function AllCards() {
   "use no memo";
-  const dbCards = useLiveQuery(() => db.cards.toArray());
+  const dbCards = useLiveQuery(() => db.cards.reverse().toArray());
 
   const table = useReactTable({
     data: dbCards ?? [],
