@@ -42,6 +42,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           schema: AIAnkiCardSchema,
           // @ts-ignore
           model,
+          mode: "json",
           system: getSystemPrompt({ settings }),
           prompt: await getPrompt({
             includePreviousPageContext,
