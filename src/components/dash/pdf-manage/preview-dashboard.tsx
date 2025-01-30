@@ -32,7 +32,7 @@ const renderStringWithHighlight = (str: string) => {
   const regex = /{{(c\d+)::(.*?)}}/g;
   const parts = str.split(regex);
   return (
-    <span className="inline-flex gap-2">
+    <span className="inline-flex gap-2 flex-wrap">
       {parts.map((part, index) => {
         if (index % 3 === 0) {
           return <span key={index}>{part}</span>; // Regular text
