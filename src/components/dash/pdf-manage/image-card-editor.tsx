@@ -73,7 +73,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
     const renderPdf = async () => {
       const page = await pdfDoc.getPage(currentPage);
-      const viewport = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: 5 });
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d")!;
 
@@ -99,8 +99,8 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
       originalDimensions,
     );
     const canvas = document.createElement("canvas");
-    canvas.width = originalDimensions.width;
-    canvas.height = originalDimensions.height;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext("2d")!;
 
     ctx.drawImage(imgRef.current, x, y, width, height, 0, 0, width, height);
@@ -275,7 +275,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
                   ref={croppedImgRef}
                   src={croppedImage}
                   alt="Cropped document"
-                  className="max-h-[75vh] w-full"
+                  className="max-h-[75vh]"
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={endDrawing}

@@ -61,9 +61,7 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
 
         if (!context) return;
 
-        const viewport = page.getViewport({ scale: 1 });
-        const scale = 620 / viewport.width;
-        const scaledViewport = page.getViewport({ scale });
+        const scaledViewport = page.getViewport({ scale: 4 });
 
         canvas.width = scaledViewport.width;
         canvas.height = scaledViewport.height;
@@ -100,7 +98,7 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col items-center w-full min-w-fit">
-        <div className="border rounded-sm max-h-[800px] overflow-hidden mx-auto w-full max-w-fit relative">
+        <div className="border rounded-sm max-h-[800px] overflow-x-hidden overflow-y-scroll mx-auto w-full max-w-fit relative">
           {loading && (
             <div className="w-full h-full absolute left-0 top-0 min-h-[620px]">
               <LoaderCircle className="animate-spin absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2" />

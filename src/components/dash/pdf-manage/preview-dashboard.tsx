@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -169,9 +168,6 @@ export function PreviewModal({
           <Datatable isLoading={false} table={table} columns={columns} />
         </div>
         <TableNav table={table} />
-        <DialogFooter>
-          <Button type="submit">Geri Dön</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -203,7 +199,7 @@ export const ImageOcclusionPreview = ({
                 ref={imgRef}
                 src={image.image}
                 alt="Occlusion preview"
-                className="max-h-[200px] object-contain"
+                className="w-96 max-h-[500px] object-contain"
               />
               {/* Boxes container */}
               <div className="absolute top-0 left-0 w-full h-full">
@@ -332,9 +328,6 @@ export function AllCards() {
           />
         </div>
         <TableNav table={table} />
-        <DialogFooter>
-          <Button type="submit">Geri Dön</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
