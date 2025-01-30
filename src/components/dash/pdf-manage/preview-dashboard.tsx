@@ -35,7 +35,7 @@ const renderStringWithHighlight = (str: string) => {
     <span className="inline-flex gap-2">
       {parts.map((part, index) => {
         if (index % 3 === 0) {
-          return <span key={index}>part</span>; // Regular text
+          return <span key={index}>{part}</span>; // Regular text
         } else if (index % 3 === 1) {
           return (
             <Badge
