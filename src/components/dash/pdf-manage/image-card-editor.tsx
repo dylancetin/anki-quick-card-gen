@@ -93,13 +93,14 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
   const handleApplyCrop = async () => {
     if (!imgRef.current) return;
 
+    console.log(crop, originalDimensions);
     const { width, height, x, y } = convertCropToPixels(
       crop,
       originalDimensions,
     );
     const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = originalDimensions.width;
+    canvas.height = originalDimensions.height;
     const ctx = canvas.getContext("2d")!;
 
     ctx.drawImage(imgRef.current, x, y, width, height, 0, 0, width, height);
@@ -253,7 +254,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
             <div className="relative flex flex-col gap-2 mx-auto w-fit">
               <ReactCrop
                 crop={crop}
-                onChange={(c) => setCrop(c)}
+                onChange={(_, c) => setCrop(c)}
                 aspect={undefined}
                 className="max-h-[75vh]"
               >

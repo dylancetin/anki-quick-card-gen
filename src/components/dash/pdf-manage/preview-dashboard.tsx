@@ -32,7 +32,7 @@ const renderStringWithHighlight = (str: string) => {
   const regex = /{{(c\d+)::(.*?)}}/g;
   const parts = str.split(regex);
   return (
-    <span className="inline-flex gap-2 flex-wrap">
+    <>
       {parts.map((part, index) => {
         if (index % 3 === 0) {
           return <span key={index}>{part}</span>; // Regular text
@@ -46,7 +46,7 @@ const renderStringWithHighlight = (str: string) => {
         }
         return null; // Skip the second capturing group
       })}
-    </span>
+    </>
   );
 };
 
@@ -57,7 +57,7 @@ function RenderTooltipContent({ content }: { content: ReactNode }) {
         <div className="truncate max-w-96 cursor-pointer">{content}</div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
-        <p className="max-w-96 text-wrap">{content}</p>
+        <p className="max-w-96 text-wrap inline-flex flex-wrap">{content}</p>
       </TooltipContent>
     </Tooltip>
   );
