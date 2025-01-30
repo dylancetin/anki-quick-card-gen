@@ -5,9 +5,16 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUpload } from "@/components/custom-ui/file";
 import { ManagePDFDash } from "@/components/dash/pdf-manage";
+import { z } from "zod";
+import { zodValidator } from "@tanstack/zod-adapter";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  validateSearch: zodValidator(
+    z.object({
+      currentPage: z.coerce.number().optional(),
+    }),
+  ),
 });
 
 type Tabs = "upload" | "inspect";

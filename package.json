@@ -51,6 +51,7 @@
     "@tanstack/react-router": "^1.97.3",
     "@tanstack/react-table": "^8.20.6",
     "@tanstack/router-devtools": "^1.97.3",
+    "@tanstack/zod-adapter": "^1.98.3",
     "@types/papaparse": "^5.3.15",
     "ai": "^4.1.0",
     "class-variance-authority": "^0.7.1",
