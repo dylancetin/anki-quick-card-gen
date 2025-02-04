@@ -34,6 +34,7 @@ Your job is simple, yet it is very important that you understand each step and p
 			}
 4. SELECT ONLY one of these card types per card. Answer in a array of objects with the type provided.
 5. ONLY ANSWER IN THE LANGUAGE OF **${settings.lang ?? "TÜRKÇE"}** in the contents of the card
+6. Prefer making shorter and more cards than to having long "back" text 
 </SYSTEM>`;
 }
 
