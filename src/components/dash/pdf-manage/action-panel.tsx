@@ -44,6 +44,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           model,
           mode: "json",
           system: getSystemPrompt({ settings }),
+          maxTokens: 5000,
           prompt: await getPrompt({
             includePreviousPageContext,
             pdfDoc,
