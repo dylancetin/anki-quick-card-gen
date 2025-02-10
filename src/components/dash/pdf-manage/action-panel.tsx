@@ -233,31 +233,22 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           </CardContent>
         </Card>
 
-        <div className="flex flex-wrap gap-4">
-          <Button onClick={convertPageToPNG}>
-            Mevcut sayfayı foto olarak indir
-          </Button>
-          <Button onClick={() => setOpenPreview(true)}>
+        <div className="flex flex-col flex-wrap gap-2">
+          <Button
+            onClick={() => setOpenPreview(true)}
+            className="w-full"
+            variant={"purple"}
+          >
             Önizleme tablosunu aç
           </Button>
-          <Button onClick={downloadAllCards}>Kartları indir</Button>
           <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
           <AllCards />
           <Button
-            onClick={async () => {
-              const page = await pdfDoc!.getPage(currentPage);
-              const textContent = await page.getTextContent();
-              console.log(textContent);
-              const fullText = textContent.items
-                .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
-                .map((item) => item.str) // Extract the string from each TextItem
-                .join(""); // Join them with a space
-              console.log(page.commonObjs);
-
-              console.log(`<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`);
-            }}
+            onClick={downloadAllCards}
+            className="w-full"
+            variant={"green"}
           >
-            Sayfa texti logla
+            Kartları indir
           </Button>
         </div>
       </CardContent>

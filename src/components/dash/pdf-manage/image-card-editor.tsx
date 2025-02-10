@@ -31,7 +31,9 @@ export function PdfCanvasDialog({ pdfDoc, currentPage }: PdfCanvasProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Foto Kart Ekle</Button>
+        <Button className="w-full" variant={"blue"}>
+          Foto Kart Ekle
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
         <DialogHeader>

@@ -10,6 +10,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        green:
+          "bg-flexoki-green-700 text-primary-foreground hover:bg-flexoki-green-700/90",
+        blue: "bg-flexoki-blue-500 text-primary-foreground hover:bg-flexoki-blue-500/90",
+        cyan: "bg-flexoki-cyan-800 text-primary-foreground hover:bg-flexoki-cyan-800/90",
+        purple:
+          "bg-flexoki-purple-500 text-primary-foreground hover:bg-flexoki-purple-500/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
