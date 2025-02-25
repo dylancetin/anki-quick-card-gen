@@ -65,20 +65,44 @@ export const openRouterProviders = [
 	"Lynn",
 	"Reflection",
 ];
-export const globalSettingsSchema = z.object({
-	key: z.string().optional(),
-	baseUrl: z.string().optional(),
-	model: z.string().optional(),
-	lang: z.enum(["TÜRKÇE", "ENGLISH"]).optional(),
-	providers: z
-		.object({ name: z.string() })
-		.array()
-		.optional()
-		.transform((providers) => {
-			if (!providers) return providers;
-			return providers.filter((provider) => provider.name.trim() !== "");
-		}),
-});
+export const globalSettingsSchema = z
+	.object({
+		selectedType: z.enum(["openai-compatible", "claude", "groq", "openrouter"]),
+		claude: z
+			.object({
+				key: z.string(),
+				model: z.string(),
+			})
+			.partial(),
+
+		groq: z
+			.object({
+				key: z.string(),
+				model: z.string(),
+			})
+			.partial(),
+		openrouter: z
+			.object({
+				key: z.string(),
+				model: z.string(),
+				providers: z
+					.object({ name: z.string() })
+					.array()
+					.transform((providers) => {
+						if (!providers) return providers;
+						return providers.filter((provider) => provider.name.trim() !== "");
+					}),
+			})
+			.partial(),
+
+		//openai compatible
+		key: z.string(),
+		baseUrl: z.string(),
+		model: z.string(),
+
+		lang: z.enum(["TÜRKÇE", "ENGLISH"]),
+	})
+	.partial();
 
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
 

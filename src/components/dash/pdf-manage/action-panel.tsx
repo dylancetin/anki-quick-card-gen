@@ -58,8 +58,6 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
 					id: toastId,
 					duration: 4000,
 				});
-
-				// db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
 			} catch (error) {
 				toast.error("AI Kartları yüklenirken bi sorun oluştu", {
 					id: toastId,

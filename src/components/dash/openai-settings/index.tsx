@@ -1,4 +1,11 @@
 import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+
+import {
 	Form,
 	FormControl,
 	FormDescription,
@@ -76,7 +83,7 @@ export function EditOpenAIConfig() {
 					Open-AI Ayarları
 				</TooltipContent>
 			</Tooltip>
-			<SheetContent>
+			<SheetContent className="overflow-y-scroll w-[448px] sm:max-w-md">
 				<SheetTitle>Hi</SheetTitle>
 				<SheetDescription>
 					Buradan Ai-SDK ayarlarını yapabilirsiniz
@@ -97,7 +104,7 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
-		name: "providers",
+		name: "openrouter.providers",
 	});
 
 	return (
@@ -122,167 +129,287 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 			>
 				<FormField
 					control={form.control}
-					name="key"
+					name="selectedType"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Open-AI API Anahtarı</FormLabel>
-							<FormControl>
-								<Input {...field} className="w-full" />
-							</FormControl>
+							<FormLabel>Aktif Sağlayıcı</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Bir sağlayıcı seç" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{["openai-compatible", "claude", "groq", "openrouter"].map(
+										(e) => (
+											<SelectItem value={e} key={e}>
+												{e}
+											</SelectItem>
+										),
+									)}
+								</SelectContent>
+							</Select>
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
-				<FormField
-					control={form.control}
-					name="baseUrl"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Open-AI Base URL</FormLabel>
-							<FormControl>
-								<Input {...field} className="w-full" />
-							</FormControl>
-							<FormDescription>
-								OpenAi api uyumlu api url(claude da destekli, "openrouter" da
-								yazabilirsiniz)
-								<br />
-								Örnek:
-								<br />
-								groq
-								<br />
-								openrouter
-								<br />
-								https://api.anthropic.com/v1
-								<br />
-								https://api.openai.com/v1
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="model"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>LLM Model</FormLabel>
-							<FormControl>
-								<Input {...field} className="w-full" />
-							</FormControl>
-							<FormDescription>
-								Örnek: gpt-4o-mini (openai ve claude dışında denemedim büyük
-								ihtimal çalışmicak)
-								<br />
-								Örnek:
-								<br />
-								deepseek/deepseek-chat
-								<br />
-								claude-3-haiku-20240307
-								<br />
-								gpt-4o-mini
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<Card className="px-2 pb-4 pt-2 space-y-4">
-					{fields.map((field, index) => (
-						<FormField
-							key={field.id}
-							control={form.control}
-							name={`providers.${index}.name`}
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="w-24 text-right">
-										Provider {index + 1}
-									</FormLabel>
-									<div className="flex items-center space-x-2 mb-4">
-										<Popover>
-											<PopoverTrigger asChild>
-												<FormControl>
-													<Button
-														variant="outline"
-														role="combobox"
-														className={cn(
-															"w-full justify-between",
-															!field.value && "text-muted-foreground",
-														)}
-													>
-														{field.value || "Select provider"}
-														<PlusCircle className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-													</Button>
-												</FormControl>
-											</PopoverTrigger>
-											<PopoverContent className="w-[200px] p-0">
-												<Command>
-													<CommandInput placeholder="Search provider..." />
-													<CommandList>
-														<CommandEmpty>No provider found.</CommandEmpty>
-														<CommandGroup>
-															{openRouterProviders.map((provider) => (
-																<CommandItem
-																	value={provider}
-																	key={provider}
-																	onSelect={() => {
+				<Accordion type="multiple" className={"space-y-5 border-none"}>
+					<AccordionItem value={"openai"} className="border rounded-lg p-2">
+						<AccordionTrigger className="text-sm py-0">
+							OpenAi-Compatible
+						</AccordionTrigger>
+						<AccordionContent className="p-2">
+							<FormField
+								control={form.control}
+								name="key"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Open-AI API Anahtarı</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="baseUrl"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Open-AI Base URL</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormDescription>
+											OpenAi api uyumlu api url (boş bırak default için)
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="model"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>LLM Model</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormDescription>Örnek: gpt-4o-mini</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</AccordionContent>
+					</AccordionItem>
+					<AccordionItem value={"claude"} className="border rounded-lg p-2">
+						<AccordionTrigger className="text-sm py-0">Claude</AccordionTrigger>
+						<AccordionContent className="p-2">
+							<FormField
+								control={form.control}
+								name="claude.key"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Claude API Anahtarı</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="claude.model"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>LLM Model</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormDescription>
+											Örnek: claude-3-haiku-20240307
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</AccordionContent>
+					</AccordionItem>
+					<AccordionItem value={"groq"} className="border rounded-lg p-2">
+						<AccordionTrigger className="text-sm py-0">Groq</AccordionTrigger>
+						<AccordionContent className="p-2">
+							<FormField
+								control={form.control}
+								name="groq.key"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Groq API Anahtarı</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="groq.model"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>LLM Model</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormDescription>
+											Örnek: deepseek-r1-distill-llama-70b
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</AccordionContent>
+					</AccordionItem>
+					<AccordionItem value={"openrouter"} className="border rounded-lg p-2">
+						<AccordionTrigger className="text-sm py-0">
+							OpenRouter
+						</AccordionTrigger>
+						<AccordionContent className="p-2">
+							<FormField
+								control={form.control}
+								name="openrouter.key"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Openrouter API Anahtarı</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="openrouter.model"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>LLM Model</FormLabel>
+										<FormControl>
+											<Input {...field} className="w-full" />
+										</FormControl>
+										<FormDescription>
+											Örnek: deepseek-r1-distill-llama-70b
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<Card className="px-2 pb-4 pt-2 space-y-4">
+								{fields.map((field, index) => (
+									<FormField
+										key={field.id}
+										control={form.control}
+										name={`openrouter.providers.${index}.name`}
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="w-24 text-right">
+													Provider {index + 1}
+												</FormLabel>
+												<div className="flex items-center space-x-2 mb-4">
+													<Popover>
+														<PopoverTrigger asChild>
+															<FormControl>
+																<Button
+																	variant="outline"
+																	role="combobox"
+																	className={cn(
+																		"w-full justify-between",
+																		!field.value && "text-muted-foreground",
+																	)}
+																>
+																	{field.value || "Select provider"}
+																	<PlusCircle className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+																</Button>
+															</FormControl>
+														</PopoverTrigger>
+														<PopoverContent className="w-[200px] p-0">
+															<Command>
+																<CommandInput placeholder="Search provider..." />
+																<CommandList>
+																	<CommandEmpty>
+																		No provider found.
+																	</CommandEmpty>
+																	<CommandGroup>
+																		{openRouterProviders.map((provider) => (
+																			<CommandItem
+																				value={provider}
+																				key={provider}
+																				onSelect={() => {
+																					form.setValue(
+																						`openrouter.providers.${index}.name`,
+																						provider,
+																					);
+																				}}
+																			>
+																				<Check
+																					className={cn(
+																						"mr-2 h-4 w-4",
+																						provider === field.value
+																							? "opacity-100"
+																							: "opacity-0",
+																					)}
+																				/>
+																				{provider}
+																			</CommandItem>
+																		))}
+																	</CommandGroup>
+																</CommandList>
+															</Command>
+															<div className="p-2 border-t">
+																<Input
+																	placeholder="Custom provider"
+																	value={field.value}
+																	onChange={(e) => {
 																		form.setValue(
-																			`providers.${index}.name`,
-																			provider,
+																			`openrouter.providers.${index}.name`,
+																			e.target.value,
 																		);
 																	}}
-																>
-																	<Check
-																		className={cn(
-																			"mr-2 h-4 w-4",
-																			provider === field.value
-																				? "opacity-100"
-																				: "opacity-0",
-																		)}
-																	/>
-																	{provider}
-																</CommandItem>
-															))}
-														</CommandGroup>
-													</CommandList>
-												</Command>
-												<div className="p-2 border-t">
-													<Input
-														placeholder="Custom provider"
-														value={field.value}
-														onChange={(e) => {
-															form.setValue(
-																`providers.${index}.name`,
-																e.target.value,
-															);
-														}}
-													/>
+																/>
+															</div>
+														</PopoverContent>
+													</Popover>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														onClick={() => remove(index)}
+													>
+														<X className="h-4 w-4" />
+													</Button>
 												</div>
-											</PopoverContent>
-										</Popover>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											onClick={() => remove(index)}
-										>
-											<X className="h-4 w-4" />
-										</Button>
-									</div>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					))}
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						className="mt-2 text-end ml-auto"
-						onClick={() => append({ name: "" })}
-					>
-						<PlusCircle className="h-4 w-4 mr-2" />
-						Sağlayıcı (openrouter için)
-					</Button>
-				</Card>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								))}
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									className="mt-2 text-end ml-auto"
+									onClick={() => append({ name: "" })}
+								>
+									<PlusCircle className="h-4 w-4 mr-2" />
+									Sağlayıcı (openrouter için)
+								</Button>
+							</Card>
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
+
 				<FormField
 					control={form.control}
 					name="lang"
