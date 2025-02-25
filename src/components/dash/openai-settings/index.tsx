@@ -165,7 +165,7 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 						<AccordionTrigger className="text-sm py-0">
 							OpenAi-Compatible
 						</AccordionTrigger>
-						<AccordionContent className="p-2">
+						<AccordionContent className="p-2 space-y-4">
 							<FormField
 								control={form.control}
 								name="key"
@@ -213,7 +213,7 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 					</AccordionItem>
 					<AccordionItem value={"claude"} className="border rounded-lg p-2">
 						<AccordionTrigger className="text-sm py-0">Claude</AccordionTrigger>
-						<AccordionContent className="p-2">
+						<AccordionContent className="p-2 space-y-4">
 							<FormField
 								control={form.control}
 								name="claude.key"
@@ -247,7 +247,7 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 					</AccordionItem>
 					<AccordionItem value={"groq"} className="border rounded-lg p-2">
 						<AccordionTrigger className="text-sm py-0">Groq</AccordionTrigger>
-						<AccordionContent className="p-2">
+						<AccordionContent className="p-2 space-y-4">
 							<FormField
 								control={form.control}
 								name="groq.key"
@@ -283,7 +283,7 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
 						<AccordionTrigger className="text-sm py-0">
 							OpenRouter
 						</AccordionTrigger>
-						<AccordionContent className="p-2">
+						<AccordionContent className="p-2 space-y-4">
 							<FormField
 								control={form.control}
 								name="openrouter.key"
