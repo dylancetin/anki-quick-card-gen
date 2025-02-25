@@ -21,6 +21,7 @@ import {
 	SheetTitle,
 	SheetContent,
 	SheetDescription,
+	SheetFooter,
 } from "@/components/ui/sheet";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,12 @@ export function EditOpenAIConfig() {
 					Buradan Ai-SDK ayarlarını yapabilirsiniz
 				</SheetDescription>
 				{open && <SettingsForm closeTab={() => setOpen(false)} />}
+				<a
+					href="https://taylan.co"
+					className="text-foreground/70 absolute left-3 bottom-3"
+				>
+					{"Taylan ™"}
+				</a>
 			</SheetContent>
 		</Sheet>
 	);
