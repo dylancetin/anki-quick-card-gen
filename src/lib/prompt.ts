@@ -4,7 +4,7 @@ import { TextItem } from "pdfjs-dist/types/src/display/api";
 import { toast } from "sonner";
 
 export function getSystemPrompt({ settings }: { settings: GlobalSettings }) {
-  return `<SYSTEM>
+	return `<SYSTEM>
 You are a LLM assistant for a student. Your job is very critical for the students success.
 
 Your job is simple, yet it is very important that you understand each step and proceed accordingly.
@@ -35,39 +35,39 @@ Your job is simple, yet it is very important that you understand each step and p
 4. SELECT ONLY one of these card types per card. Answer in a array of objects with the type provided.
 5. ONLY ANSWER IN THE LANGUAGE OF **${settings.lang ?? "TÜRKÇE"}** in the contents of the card
 6. Prefer making shorter maybe even one word answers and more cards than to having long "back" text 
-7. Generate up-to 40 cards per page requested
+7. Generate up-to 20 cards per page requested
 </SYSTEM>`;
 }
 
 export async function getPrompt({
-  includePreviousPageContext,
-  currentPage,
-  pdfDoc,
+	includePreviousPageContext,
+	currentPage,
+	pdfDoc,
 }: {
-  includePreviousPageContext: boolean;
-  currentPage: number;
-  pdfDoc: PDFDocumentProxy | null;
+	includePreviousPageContext: boolean;
+	currentPage: number;
+	pdfDoc: PDFDocumentProxy | null;
 }) {
-  if (!pdfDoc) {
-    toast.error("PDF Dökümanı yüklenemedi sayfayı yeniyelin");
-    return;
-  }
-  const previousPageContent = async () => {
-    const page = await pdfDoc.getPage(currentPage - 1);
-    const textContent = await page.getTextContent();
-    return `<PREVIOUS_PAGE_CONTEXT>${textContent}</PREVIOUS_PAGE_CONTEXT>\n\n`;
-  };
-  const pageContent = async () => {
-    const page = await pdfDoc.getPage(currentPage);
-    const textContent = await page.getTextContent();
-    console.log(textContent);
-    const fullText = textContent.items
-      .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
-      .map((item) => item.str) // Extract the string from each TextItem
-      .join("");
+	if (!pdfDoc) {
+		toast.error("PDF Dökümanı yüklenemedi sayfayı yeniyelin");
+		return;
+	}
+	const previousPageContent = async () => {
+		const page = await pdfDoc.getPage(currentPage - 1);
+		const textContent = await page.getTextContent();
+		return `<PREVIOUS_PAGE_CONTEXT>${textContent}</PREVIOUS_PAGE_CONTEXT>\n\n`;
+	};
+	const pageContent = async () => {
+		const page = await pdfDoc.getPage(currentPage);
+		const textContent = await page.getTextContent();
+		console.log(textContent);
+		const fullText = textContent.items
+			.filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
+			.map((item) => item.str) // Extract the string from each TextItem
+			.join("");
 
-    return `<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`;
-  };
+		return `<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`;
+	};
 
-  return `${includePreviousPageContext ? await previousPageContent() : ""}${await pageContent()}`;
+	return `${includePreviousPageContext ? await previousPageContent() : ""}${await pageContent()}`;
 }

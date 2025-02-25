@@ -18,240 +18,196 @@ import Papa from "papaparse";
 import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
 import JSZip from "jszip";
-import { TextItem } from "pdfjs-dist/types/src/display/api";
 
 interface ActionsPanelProps {
-  pdfDoc: PDFDocumentProxy | null;
-  currentPage: number;
+	pdfDoc: PDFDocumentProxy | null;
+	currentPage: number;
 }
 
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
-  const [includePreviousPageContext, setIncludePreviousPageContext] =
-    useState(false);
-  const [settings, _] = useGlobalSettingsState();
-  const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>([]);
-  const [openPreview, setOpenPreview] = useState(false);
-  const model = useModel();
+	const [includePreviousPageContext, setIncludePreviousPageContext] =
+		useState(false);
+	const [settings, _] = useGlobalSettingsState();
+	const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>([]);
+	const [openPreview, setOpenPreview] = useState(false);
+	const model = useModel();
 
-  const cardGenMutation = useMutation({
-    ...errorAndSuccessToasts,
-    mutationFn: async () => {
-      const toastId = toast.loading("AI cevabı yükleniyor");
-      try {
-        const { object } = await generateObject({
-          schema: AIAnkiCardSchema,
-          // @ts-ignore
-          model,
-          mode: "json",
-          system: getSystemPrompt({ settings }),
-          maxTokens: 5000,
-          prompt: await getPrompt({
-            includePreviousPageContext,
-            pdfDoc,
-            currentPage,
-          }),
-        });
-        AIAnkiCardSchema.parse(object);
-        setPreviewCards((d) => {
-          d.push(...object.cards);
-        });
-        toast.success("AI Kartları yüklendi lütfen kartları onaylayın", {
-          id: toastId,
-          duration: 4000,
-        });
+	const cardGenMutation = useMutation({
+		...errorAndSuccessToasts,
+		mutationFn: async () => {
+			const toastId = toast.loading("AI cevabı yükleniyor");
+			try {
+				const { object } = await generateObject({
+					schema: AIAnkiCardSchema,
+					// @ts-ignore
+					model,
+					mode: "json",
+					system: getSystemPrompt({ settings }),
+					maxTokens: 5000,
+					prompt: await getPrompt({
+						includePreviousPageContext,
+						pdfDoc,
+						currentPage,
+					}),
+				});
+				AIAnkiCardSchema.parse(object);
+				setPreviewCards((d) => {
+					d.push(...object.cards);
+				});
+				toast.success("AI Kartları yüklendi lütfen kartları onaylayın", {
+					id: toastId,
+					duration: 4000,
+				});
 
-        // db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
-      } catch (error) {
-        toast.error("AI Kartları yüklenirken bi sorun oluştu", {
-          id: toastId,
-          duration: 4000,
-        });
+				// db.cards.bulkAdd(object.cards.map((c) => ({ value: c })));
+			} catch (error) {
+				toast.error("AI Kartları yüklenirken bi sorun oluştu", {
+					id: toastId,
+					duration: 4000,
+				});
 
-        console.error("Error summarizing page:", error);
-      }
-    },
-  });
+				console.error("Error summarizing page:", error);
+			}
+		},
+	});
 
-  async function convertPageToPNG() {
-    if (!pdfDoc) return;
-    try {
-      const page = await pdfDoc.getPage(currentPage);
+	async function downloadAllCards() {
+		const allCards: AnkiCard["value"][] = (await db.cards.toArray()).map(
+			(d) => d.value,
+		);
+		console.log(allCards);
 
-      // Set the scale for rendering (1 = 100%)
-      const scale = 1;
-      const viewport = page.getViewport({ scale });
+		// Convert the array of cards to CSV
+		const neededImagIds: string[] = [];
+		const csv = Papa.unparse(
+			allCards.map((c) => {
+				switch (c.type) {
+					case "Basic": {
+						return [c.type, c.front, c.back];
+					}
+					case "Type-in": {
+						return [c.type, c.front, c.back];
+					}
+					case "Cloze": {
+						return [c.type, c.front];
+					}
+					case "Image Occlusion": {
+						neededImagIds.push(c.imageId);
+						return [
+							c.type,
+							c.boxes
+								.map(
+									(b, i) =>
+										`{{c${i + 1}::image-occlusion:rect:left=${b.x}:top=${b.y}:width=${b.width}:height=${b.height}:oi=1}}`,
+								)
+								.join(" "),
+							`<img src="${c.imageId}.webp">`,
+						];
+					}
+				}
+			}),
+			{
+				header: false,
+			},
+		);
 
-      // Create a canvas element
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+		// Create a blob from the CSV string
+		const blob = new Blob([txtHead, csv], { type: "text/txt;charset=utf-8;" });
 
-      // Render PDF page into canvas context
-      if (!context) {
-        toast.error("Bir şey yanlış oldu");
-        return;
-      }
+		const zip = new JSZip();
+		zip.file("cards.txt", blob);
 
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-      };
+		const imgFolder = zip.folder("images");
 
-      await page.render(renderContext).promise;
+		if (!imgFolder) {
+			console.error("sometgng went terribly wrong");
+			return;
+		}
 
-      // Convert canvas to PNG
-      // Convert canvas to PNG and open in new tab
-      const webpDataUrl = canvas.toDataURL("image/webp");
-      const link = document.createElement("a");
-      link.href = webpDataUrl;
-      link.download = "pdf-page.webp";
-      link.target = "_blank";
-      link.click();
-    } catch (error) {
-      console.error("Error converting PDF to PNG:", error);
-      throw error;
-    }
-  }
+		await Promise.allSettled(
+			neededImagIds.map(async (imageId) => {
+				const imageData = await db.images.get(imageId);
+				if (!imageData) {
+					return;
+				}
+				imgFolder.file(`${imageId}.webp`, imageData.image.split(",")[1], {
+					base64: true,
+				});
+			}),
+		);
 
-  async function downloadAllCards() {
-    const allCards: AnkiCard["value"][] = (await db.cards.toArray()).map(
-      (d) => d.value,
-    );
-    console.log(allCards);
+		// Create a link element
+		const zipBlob = await zip.generateAsync({ type: "blob" });
+		const link = document.createElement("a");
+		const url = URL.createObjectURL(zipBlob);
+		link.setAttribute("href", url);
+		link.setAttribute("download", "all_cards.zip"); // Set the desired file name
 
-    // Convert the array of cards to CSV
-    //
-    const neededImagIds: string[] = [];
-    const csv = Papa.unparse(
-      allCards.map((c) => {
-        switch (c.type) {
-          case "Basic": {
-            return [c.type, c.front, c.back];
-          }
-          case "Type-in": {
-            return [c.type, c.front, c.back];
-          }
-          case "Cloze": {
-            return [c.type, c.front];
-          }
-          case "Image Occlusion": {
-            neededImagIds.push(c.imageId);
-            return [
-              c.type,
-              c.boxes
-                .map(
-                  (b, i) =>
-                    `{{c${i + 1}::image-occlusion:rect:left=${b.x}:top=${b.y}:width=${b.width}:height=${b.height}:oi=1}}`,
-                )
-                .join(" "),
-              `<img src="${c.imageId}.webp">`,
-            ];
-          }
-        }
-      }),
-      {
-        header: false,
-      },
-    );
+		// Append to the body (required for Firefox)
+		document.body.appendChild(link);
 
-    // Create a blob from the CSV string
-    const blob = new Blob([txtHead, csv], { type: "text/txt;charset=utf-8;" });
+		// Trigger the download
+		link.click();
 
-    const zip = new JSZip();
-    zip.file("cards.txt", blob);
+		// Clean up and remove the link
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	}
 
-    const imgFolder = zip.folder("images");
+	return (
+		<Card>
+			<PreviewModal
+				open={openPreview}
+				setOpen={setOpenPreview}
+				previewCards={previewCards}
+				setPreviewCards={setPreviewCards}
+			/>
 
-    if (!imgFolder) {
-      console.error("sometgng went terribly wrong");
-      return;
-    }
+			<CardHeader>
+				<CardTitle>Actions</CardTitle>
+			</CardHeader>
+			<CardContent className="block space-y-4">
+				<Card>
+					<CardContent className="block space-y-4">
+						<div className="space-y-2">
+							<Label className="text-lg block">
+								Bir önceki sayfayı bağlama ekle
+							</Label>
+							<Switch
+								checked={includePreviousPageContext}
+								onCheckedChange={(e) =>
+									setIncludePreviousPageContext(e as boolean)
+								}
+							/>
+						</div>
+						<Button
+							onClick={() => cardGenMutation.mutate()}
+							disabled={cardGenMutation.isPending}
+						>
+							Mevcut sayfadan kart oluştur
+						</Button>
+					</CardContent>
+				</Card>
 
-    await Promise.allSettled(
-      neededImagIds.map(async (imageId) => {
-        const imageData = await db.images.get(imageId);
-        if (!imageData) {
-          return;
-        }
-        imgFolder.file(`${imageId}.webp`, imageData.image.split(",")[1], {
-          base64: true,
-        });
-      }),
-    );
-
-    // Create a link element
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(zipBlob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "all_cards.zip"); // Set the desired file name
-
-    // Append to the body (required for Firefox)
-    document.body.appendChild(link);
-
-    // Trigger the download
-    link.click();
-
-    // Clean up and remove the link
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  return (
-    <Card>
-      <PreviewModal
-        open={openPreview}
-        setOpen={setOpenPreview}
-        previewCards={previewCards}
-        setPreviewCards={setPreviewCards}
-      />
-
-      <CardHeader>
-        <CardTitle>Actions</CardTitle>
-      </CardHeader>
-      <CardContent className="block space-y-4">
-        <Card>
-          <CardContent className="block space-y-4">
-            <div className="space-y-2">
-              <Label className="text-lg block">
-                Bir önceki sayfayı bağlama ekle
-              </Label>
-              <Switch
-                checked={includePreviousPageContext}
-                onCheckedChange={(e) =>
-                  setIncludePreviousPageContext(e as boolean)
-                }
-              />
-            </div>
-            <Button
-              onClick={() => cardGenMutation.mutate()}
-              disabled={cardGenMutation.isPending}
-            >
-              Mevcut sayfadan kart oluştur
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div className="flex flex-col flex-wrap gap-2">
-          <Button
-            onClick={() => setOpenPreview(true)}
-            className="w-full"
-            variant={"purple"}
-          >
-            Önizleme tablosunu aç
-          </Button>
-          <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
-          <AllCards />
-          <Button
-            onClick={downloadAllCards}
-            className="w-full"
-            variant={"green"}
-          >
-            Kartları indir
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+				<div className="flex flex-col flex-wrap gap-2">
+					<Button
+						onClick={() => setOpenPreview(true)}
+						className="w-full"
+						variant={"purple"}
+					>
+						Önizleme tablosunu aç
+					</Button>
+					<PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
+					<AllCards />
+					<Button
+						onClick={downloadAllCards}
+						className="w-full"
+						variant={"green"}
+					>
+						Kartları indir
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
 }
