@@ -4,7 +4,7 @@
 
 @layer base {
 	:root {
-		--flexoki-bg: 255 252 250;
+		--flexoki-bg: 100 100% 100;
 		--flexoki-bg-2: 51 33% 92%;
 
 		--flexoki-ui: 51 21% 88%;
