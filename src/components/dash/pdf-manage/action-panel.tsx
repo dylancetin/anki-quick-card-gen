@@ -39,7 +39,6 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
 			try {
 				const { object } = await generateObject({
 					schema: AIAnkiCardSchema,
-					// @ts-ignore
 					model,
 					mode: "json",
 					system: getSystemPrompt({ settings }),
