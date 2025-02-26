@@ -70,6 +70,6 @@ export const useModel = () => {
 			apiKey: settings.key,
 			baseURL: settings.baseUrl,
 		})(settings.model ?? "gpt-4o-mini");
-	}, [settings.key, settings.baseUrl, settings.model]) as LanguageModelV1;
+	}, [JSON.stringify(settings)]) as LanguageModelV1;
 	return model;
 };
