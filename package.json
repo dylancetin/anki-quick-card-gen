@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "rsbuild dev",
+    "dev": "rsbuild dev --open",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
     "pdf-ocr": "ocrmypdf -l tur"

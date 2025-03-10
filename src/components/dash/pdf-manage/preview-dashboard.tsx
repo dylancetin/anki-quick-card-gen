@@ -1,5 +1,12 @@
 import { AIAnkiCard, AnkiCard, db } from "@/lib/db";
-import { useRef, useMemo, type Dispatch, type SetStateAction } from "react";
+import {
+  useRef,
+  useMemo,
+  type Dispatch,
+  type SetStateAction,
+  useState,
+  useEffect,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,8 +20,20 @@ import {
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogTrigger,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { Datatable } from "@/components/custom-ui/datatable";
 import { TableNav } from "@/components/custom-ui/datatable";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +45,7 @@ import {
 import { ReactNode } from "@tanstack/react-router";
 import { Updater } from "use-immer";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Textarea } from "@/components/ui/textarea";
 
 const renderStringWithHighlight = (str: string) => {
   const regex = /{{(c\d+)::(.*?)}}/g;
@@ -49,11 +69,22 @@ const renderStringWithHighlight = (str: string) => {
   );
 };
 
-function RenderTooltipContent({ content }: { content: ReactNode }) {
+function RenderTooltipContent({
+  content,
+  onDoubleClick,
+}: {
+  content: ReactNode;
+  onDoubleClick?: () => void;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="truncate max-w-96 cursor-pointer">{content}</div>
+        <div
+          className="truncate max-w-96 cursor-pointer"
+          onDoubleClick={onDoubleClick}
+        >
+          {content}
+        </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
         <p className="max-w-96 text-wrap inline-flex flex-wrap">{content}</p>
@@ -77,6 +108,20 @@ export function PreviewModal({
   function saveToDB(card: AIAnkiCard["cards"][number]) {
     db.cards.add({ value: card });
   }
+
+  // State for the edit dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+  const [editFocusField, setEditFocusField] = useState<"front" | "back" | null>(
+    null,
+  );
+
+  const handleCellDoubleClick = (rowIndex: number, field: "front" | "back") => {
+    setEditingRowIndex(rowIndex);
+    setEditFocusField(field);
+    setEditDialogOpen(true);
+  };
+
   const columns: ColumnDef<AIAnkiCard["cards"][number]>[] = useMemo(
     () => [
       {
@@ -90,13 +135,19 @@ export function PreviewModal({
             row.original.type === "Basic" ||
             row.original.type === "Type-in"
           ) {
-            return <RenderTooltipContent content={row.original.front} />;
+            return (
+              <RenderTooltipContent
+                content={row.original.front}
+                onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
+              />
+            );
           }
 
           if (row.original.type === "Cloze") {
             return (
               <RenderTooltipContent
                 content={renderStringWithHighlight(row.original.front)}
+                onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
               />
             );
           }
@@ -107,13 +158,36 @@ export function PreviewModal({
       {
         accessorKey: "back",
         header: "Arka-Yüz",
-        cell: ({ getValue }) => <RenderTooltipContent content={getValue()} />,
+        cell: ({ getValue, row }) => (
+          <RenderTooltipContent
+            content={getValue()}
+            onDoubleClick={() => {
+              if (
+                row.original.type === "Basic" ||
+                row.original.type === "Type-in"
+              ) {
+                handleCellDoubleClick(row.index, "back");
+              }
+            }}
+          />
+        ),
       },
       {
         header: "Aksiyonlar",
         cell: ({ row }) => {
           return (
             <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setEditingRowIndex(row.index);
+                  setEditFocusField(null);
+                  setEditDialogOpen(true);
+                }}
+              >
+                Düzenle
+              </Button>
               <Button
                 onClick={() => {
                   saveToDB(row.original);
@@ -155,6 +229,120 @@ export function PreviewModal({
       },
     },
   });
+
+  const EditCardComponent = () => {
+    if (editingRowIndex === null || editingRowIndex >= previewCards.length) {
+      return null;
+    }
+
+    const card = previewCards[editingRowIndex];
+    const [frontContent, setFrontContent] = useState(card.front || "");
+    const [backContent, setBackContent] = useState(
+      // @ts-ignore
+      card.back || "",
+    );
+
+    const frontRef = useRef<HTMLTextAreaElement>(null);
+    const backRef = useRef<HTMLTextAreaElement>(null);
+
+    // Reset content when dialog opens or card changes
+    useEffect(() => {
+      if (editDialogOpen) {
+        setFrontContent(card.front || "");
+        if (card.type !== "Cloze") setBackContent(card.back || "");
+      }
+    }, [editDialogOpen, card]);
+
+    // Focus the appropriate field when the dialog opens
+    useEffect(() => {
+      if (editDialogOpen && editFocusField) {
+        setTimeout(() => {
+          if (editFocusField === "front" && frontRef.current) {
+            frontRef.current.focus();
+            frontRef.current.setSelectionRange(
+              0,
+              frontRef.current.value.length,
+            );
+          } else if (editFocusField === "back" && backRef.current) {
+            backRef.current.focus();
+            backRef.current.setSelectionRange(0, backRef.current.value.length);
+          }
+        }, 50); // Small delay to ensure component is mounted
+      }
+    }, [editDialogOpen, editFocusField]);
+
+    const handleSave = () => {
+      setPreviewCards((cards) => {
+        if (card.type === "Basic" || card.type === "Type-in") {
+          cards[editingRowIndex] = {
+            type: card.type,
+            front: frontContent,
+            back: backContent,
+          };
+        }
+
+        if (card.type === "Cloze") {
+          cards[editingRowIndex] = {
+            ...cards[editingRowIndex],
+            front: frontContent,
+          };
+        }
+      });
+      setEditDialogOpen(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    return (
+      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <AlertDialogContent className="max-w-[500px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kartı Düzenle</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kartın içeriğini düzenleyip kaydedebilirsiniz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 my-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Ön-Yüz</label>
+              <Textarea
+                ref={frontRef}
+                value={frontContent}
+                onChange={(e) => setFrontContent(e.target.value)}
+                placeholder="Ön-Yüz metni"
+                rows={4}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+            {(card.type === "Basic" || card.type === "Type-in") && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Arka-Yüz</label>
+                <Textarea
+                  ref={backRef}
+                  value={backContent}
+                  onChange={(e) => setBackContent(e.target.value)}
+                  placeholder="Arka-Yüz metni"
+                  rows={4}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave}>
+              Düzenlemeyi Kaydet
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
@@ -168,6 +356,7 @@ export function PreviewModal({
           <Datatable isLoading={false} table={table} columns={columns} />
         </div>
         <TableNav table={table} />
+        <EditCardComponent />
       </DialogContent>
     </Dialog>
   );
