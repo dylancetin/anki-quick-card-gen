@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { db } from "@/lib/db";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react"; // Import trash icon
 
 interface PdfCanvasProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -58,6 +59,7 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
     y: 0,
   });
   const [boxes, setBoxes] = useState<Box[]>([]);
+  const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentBox, setCurrentBox] = useState<Box | null>(null);
   const [originalDimensions, setOriginalDimensions] = useState({
@@ -116,6 +118,16 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
   const startDrawing = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!croppedImgRef.current) return;
 
+    // If we're clicking on an existing box, select it instead of drawing
+    const clickedBoxIndex = getBoxAtPosition(e);
+    if (clickedBoxIndex !== null) {
+      setSelectedBoxIndex(clickedBoxIndex);
+      return;
+    }
+
+    // Clear selection when starting to draw a new box
+    setSelectedBoxIndex(null);
+
     const rect = croppedImgRef.current.getBoundingClientRect();
     const naturalWidth = croppedImgRef.current.naturalWidth;
     const naturalHeight = croppedImgRef.current.naturalHeight;
@@ -162,11 +174,85 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
       Math.abs(currentBox.width) > 0.01 &&
       Math.abs(currentBox.height) > 0.01
     ) {
-      setBoxes((prev) => [...prev, currentBox]);
+      // Normalize box dimensions if drawn in reverse direction
+      const normalizedBox = {
+        x:
+          currentBox.width < 0 ? currentBox.x + currentBox.width : currentBox.x,
+        y:
+          currentBox.height < 0
+            ? currentBox.y + currentBox.height
+            : currentBox.y,
+        width: Math.abs(currentBox.width),
+        height: Math.abs(currentBox.height),
+      };
+
+      setBoxes((prev) => [...prev, normalizedBox]);
     }
     setIsDrawing(false);
     setCurrentBox(null);
   };
+
+  // Function to check if a click hits an existing box
+  const getBoxAtPosition = (e: React.MouseEvent<HTMLImageElement>) => {
+    if (!croppedImgRef.current || boxes.length === 0) return null;
+
+    const rect = croppedImgRef.current.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+
+    const canvasX = e.clientX - rect.left;
+    const canvasY = e.clientY - rect.top;
+
+    // Check if click is inside any box
+    for (let i = boxes.length - 1; i >= 0; i--) {
+      const box = boxes[i];
+      const boxX = box.x * canvas.width;
+      const boxY = box.y * canvas.height;
+      const boxWidth = box.width * canvas.width;
+      const boxHeight = box.height * canvas.height;
+
+      if (
+        canvasX >= boxX &&
+        canvasX <= boxX + boxWidth &&
+        canvasY >= boxY &&
+        canvasY <= boxY + boxHeight
+      ) {
+        return i;
+      }
+    }
+
+    return null;
+  };
+
+  // Remove selected box
+  const removeSelectedBox = () => {
+    if (selectedBoxIndex !== null) {
+      setBoxes(boxes.filter((_, index) => index !== selectedBoxIndex));
+      setSelectedBoxIndex(null);
+      toast.success("Box removed");
+    }
+  };
+
+  // Handle keydown for delete key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.key === "Delete" || e.key === "Backspace") &&
+        selectedBoxIndex !== null
+      ) {
+        removeSelectedBox();
+      }
+      // Escape key to deselect
+      if (e.key === "Escape") {
+        setSelectedBoxIndex(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedBoxIndex, boxes]);
 
   // Draw boxes overlay
   useEffect(() => {
@@ -180,11 +266,18 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
     canvas.height = img.offsetHeight;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#ff0000";
-    ctx.lineWidth = 2;
 
     // Draw existing boxes
-    boxes.forEach((box) => {
+    boxes.forEach((box, index) => {
+      // Selected box has a different style
+      if (index === selectedBoxIndex) {
+        ctx.strokeStyle = "#00ff00"; // Green for selected box
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = "#ff0000"; // Red for normal boxes
+        ctx.lineWidth = 2;
+      }
+
       ctx.strokeRect(
         box.x * canvas.width,
         box.y * canvas.height,
@@ -195,14 +288,25 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
     // Draw current box
     if (currentBox) {
+      ctx.strokeStyle = "#ff0000";
+      ctx.lineWidth = 2;
+
+      // Calculate normalized coordinates for drawing
+      const normalizedX =
+        currentBox.width < 0 ? currentBox.x + currentBox.width : currentBox.x;
+      const normalizedY =
+        currentBox.height < 0 ? currentBox.y + currentBox.height : currentBox.y;
+      const normalizedWidth = Math.abs(currentBox.width);
+      const normalizedHeight = Math.abs(currentBox.height);
+
       ctx.strokeRect(
-        currentBox.x * canvas.width,
-        currentBox.y * canvas.height,
-        currentBox.width * canvas.width,
-        currentBox.height * canvas.height,
+        normalizedX * canvas.width,
+        normalizedY * canvas.height,
+        normalizedWidth * canvas.width,
+        normalizedHeight * canvas.height,
       );
     }
-  }, [boxes, currentBox]);
+  }, [boxes, currentBox, selectedBoxIndex]);
 
   // Final export handler
   const handleExport = () => {
@@ -272,12 +376,12 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
         <TabsContent value="annotate">
           {croppedImage && (
             <div className="relative flex flex-col gap-2 mx-auto w-fit">
-              <div className="relative inline-block w-full max-h-[75vh]">
+              <div className="relative inline-block w-full max-h-[70vh]">
                 <img
                   ref={croppedImgRef}
                   src={croppedImage}
                   alt="Cropped document"
-                  className="max-h-[75vh]"
+                  className="max-h-[70vh]"
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={endDrawing}
@@ -291,6 +395,25 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
                   style={{ imageRendering: "crisp-edges" }}
                 />
               </div>
+              <div className="flex gap-2 mt-4">
+                <Button variant={"outline"}>{boxes.length} Boxes</Button>
+
+                <Button
+                  variant="destructive"
+                  onClick={removeSelectedBox}
+                  disabled={selectedBoxIndex === null}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remove Selected Box
+                </Button>
+              </div>
+
+              <div className="text-sm text-muted-foreground mt-2">
+                {selectedBoxIndex !== null
+                  ? "Press Delete or Backspace to remove the selected box, or Escape to deselect."
+                  : "Click on a box to select it for removal."}
+              </div>
+
               <Button className="mt-4" onClick={handleExport}>
                 Export Final Version
               </Button>
