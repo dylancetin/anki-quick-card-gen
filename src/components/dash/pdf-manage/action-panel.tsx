@@ -33,6 +33,9 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const model = useModel();
 
   const cardGenMutation = useMutation({
+    scope: {
+      id: "card-gen",
+    },
     mutationFn: async () => {
       const toastId = toast.loading(
         `Sayfa ${currentPage} AI cevabı yükleniyor`,
