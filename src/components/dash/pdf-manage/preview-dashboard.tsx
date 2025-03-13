@@ -72,15 +72,17 @@ const renderStringWithHighlight = (str: string) => {
 function RenderTooltipContent({
   content,
   onDoubleClick,
+  doTruncate = true,
 }: {
   content: ReactNode;
   onDoubleClick?: () => void;
+  doTruncate?: boolean;
 }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="truncate max-w-96 cursor-pointer"
+          className={`${doTruncate ? "truncate" : "text-wrap"} max-w-96 cursor-pointer`}
           onDoubleClick={onDoubleClick}
         >
           {content}
@@ -93,6 +95,7 @@ function RenderTooltipContent({
   );
 }
 
+const PREVIEW_PAGE_SIZE = 8;
 export function PreviewModal({
   open,
   setOpen,
@@ -139,6 +142,7 @@ export function PreviewModal({
               <RenderTooltipContent
                 content={row.original.front}
                 onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
+                doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
               />
             );
           }
@@ -148,6 +152,7 @@ export function PreviewModal({
               <RenderTooltipContent
                 content={renderStringWithHighlight(row.original.front)}
                 onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
+                doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
               />
             );
           }
@@ -169,6 +174,7 @@ export function PreviewModal({
                 handleCellDoubleClick(row.index, "back");
               }
             }}
+            doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
           />
         ),
       },
@@ -225,7 +231,7 @@ export function PreviewModal({
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: PREVIEW_PAGE_SIZE,
       },
     },
   });
