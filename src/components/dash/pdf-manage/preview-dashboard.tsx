@@ -6,6 +6,7 @@ import {
   type SetStateAction,
   useState,
   useEffect,
+  useCallback,
 } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,6 @@ import {
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
-  Row,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -31,7 +31,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
-  AlertDialogTrigger,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Datatable } from "@/components/custom-ui/datatable";
@@ -185,7 +184,7 @@ export function PreviewModal({
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant="outline"
+                variant="blue"
                 onClick={() => {
                   setEditingRowIndex(row.index);
                   setEditFocusField(null);
@@ -418,80 +417,233 @@ export const ImageOcclusionPreview = ({
     </Tooltip>
   );
 };
-const allCardsColumns: ColumnDef<AnkiCard>[] = [
-  {
-    accessorKey: "value.type",
-    header: "Tür",
-  },
-  {
-    header: "Ön-Yüz",
-    cell: ({ row }) => {
-      if (
-        row.original.value.type === "Basic" ||
-        row.original.value.type === "Type-in"
-      ) {
-        return <RenderTooltipContent content={row.original.value.front} />;
-      }
-
-      if (row.original.value.type === "Cloze") {
-        return (
-          <RenderTooltipContent
-            content={renderStringWithHighlight(row.original.value.front)}
-          />
-        );
-      }
-      if (row.original.value.type === "Image Occlusion") {
-        return (
-          <ImageOcclusionPreview
-            boxes={row.original.value.boxes}
-            imageId={row.original.value.imageId}
-          />
-        );
-      }
-
-      return null;
-    },
-  },
-  {
-    header: "Arka-Yüz",
-    cell: ({
-      row: {
-        original: { value },
-      },
-    }) => (
-      <RenderTooltipContent
-        content={
-          value.type === "Basic" || value.type === "Type-in" ? value.back : ""
-        }
-      />
-    ),
-  },
-  {
-    header: "Aksiyonlar",
-    cell: ({ row }) => {
-      return (
-        <div className="flex gap-2">
-          <Button
-            onClick={async () => {
-              if (row.original.value.type === "Image Occlusion") {
-                await db.images.delete(row.original.value.imageId);
-              }
-              await db.cards.delete(row.original.id);
-            }}
-            size={"sm"}
-            variant={"destructive"}
-          >
-            Sil
-          </Button>
-        </div>
-      );
-    },
-  },
-];
 
 export function AllCards() {
   "use no memo";
   const dbCards = useLiveQuery(() => db.cards.reverse().toArray());
+
+  // State for the edit dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingRow, setEditingRow] = useState<AnkiCard | null>(null);
+  const [editFocusField, setEditFocusField] = useState<"front" | "back" | null>(
+    null,
+  );
+
+  const handleCellDoubleClick = useCallback(
+    (rowIndex: AnkiCard, field: "front" | "back" | null) => {
+      setEditingRow(rowIndex);
+      setEditFocusField(field);
+      setEditDialogOpen(true);
+    },
+    [setEditDialogOpen, setEditFocusField, setEditingRow],
+  );
+
+  const EditCardComponent = () => {
+    const [frontContent, setFrontContent] = useState(
+      // @ts-ignore
+      editingRow?.value.front || "",
+    );
+    const [backContent, setBackContent] = useState(
+      // @ts-ignore
+      editingRow?.value.back || "",
+    );
+
+    const frontRef = useRef<HTMLTextAreaElement>(null);
+    const backRef = useRef<HTMLTextAreaElement>(null);
+
+    // Reset content when dialog opens or card changes
+    useEffect(() => {
+      if (editDialogOpen) {
+        if (!editingRow) {
+          return;
+        }
+        if (editingRow.value.type === "Image Occlusion") {
+          return;
+        }
+
+        setFrontContent(editingRow.value.front || "");
+        if (editingRow.value.type !== "Cloze")
+          setBackContent(editingRow.value.back || "");
+      }
+    }, [editDialogOpen, editingRow]);
+
+    // Focus the appropriate field when the dialog opens
+    useEffect(() => {
+      if (editDialogOpen && editFocusField) {
+        setTimeout(() => {
+          if (editFocusField === "front" && frontRef.current) {
+            frontRef.current.focus();
+            frontRef.current.setSelectionRange(
+              0,
+              frontRef.current.value.length,
+            );
+          } else if (editFocusField === "back" && backRef.current) {
+            backRef.current.focus();
+            backRef.current.setSelectionRange(0, backRef.current.value.length);
+          }
+        }, 50); // Small delay to ensure component is mounted
+      }
+    }, [editDialogOpen, editFocusField]);
+
+    const handleSave = async () => {
+      if (!editingRow || editingRow.value.type === "Image Occlusion") {
+        return;
+      }
+      await db.cards.update(editingRow.id, {
+        ...(editingRow.value.type !== "Cloze"
+          ? { "value.back": backContent }
+          : undefined),
+        // @ts-ignore
+        "value.front": frontContent,
+      });
+      setEditDialogOpen(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    return (
+      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <AlertDialogContent className="max-w-[500px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kartı Düzenle</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kartın içeriğini düzenleyip kaydedebilirsiniz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 my-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Ön-Yüz</label>
+              <Textarea
+                ref={frontRef}
+                value={frontContent}
+                onChange={(e) => setFrontContent(e.target.value)}
+                placeholder="Ön-Yüz metni"
+                rows={4}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+            {(editingRow?.value.type === "Basic" ||
+              editingRow?.value.type === "Type-in") && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Arka-Yüz</label>
+                <Textarea
+                  ref={backRef}
+                  value={backContent}
+                  onChange={(e) => setBackContent(e.target.value)}
+                  placeholder="Arka-Yüz metni"
+                  rows={4}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave}>
+              Düzenlemeyi Kaydet
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
+
+  const allCardsColumns: ColumnDef<AnkiCard>[] = useMemo(
+    () => [
+      {
+        accessorKey: "value.type",
+        header: "Tür",
+      },
+      {
+        header: "Ön-Yüz",
+        cell: ({ row }) => {
+          if (
+            row.original.value.type === "Basic" ||
+            row.original.value.type === "Type-in"
+          ) {
+            return (
+              <RenderTooltipContent
+                content={row.original.value.front}
+                onDoubleClick={() =>
+                  handleCellDoubleClick(row.original, "front")
+                }
+              />
+            );
+          }
+
+          if (row.original.value.type === "Cloze") {
+            return (
+              <RenderTooltipContent
+                content={renderStringWithHighlight(row.original.value.front)}
+                onDoubleClick={() =>
+                  handleCellDoubleClick(row.original, "front")
+                }
+              />
+            );
+          }
+          if (row.original.value.type === "Image Occlusion") {
+            return (
+              <ImageOcclusionPreview
+                boxes={row.original.value.boxes}
+                imageId={row.original.value.imageId}
+              />
+            );
+          }
+
+          return null;
+        },
+      },
+      {
+        header: "Arka-Yüz",
+        cell: ({ row }) => (
+          <RenderTooltipContent
+            content={
+              row.original.value.type === "Basic" ||
+              row.original.value.type === "Type-in"
+                ? row.original.value.back
+                : ""
+            }
+            onDoubleClick={() => handleCellDoubleClick(row.original, "back")}
+          />
+        ),
+      },
+      {
+        header: "Aksiyonlar",
+        cell: ({ row }) => {
+          return (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="blue"
+                onClick={() => {
+                  handleCellDoubleClick(row.original, null);
+                }}
+              >
+                Düzenle
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (row.original.value.type === "Image Occlusion") {
+                    await db.images.delete(row.original.value.imageId);
+                  }
+                  await db.cards.delete(row.original.id);
+                }}
+                size={"sm"}
+                variant={"destructive"}
+              >
+                Sil
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [handleCellDoubleClick],
+  );
 
   const table = useReactTable({
     data: dbCards ?? [],
@@ -525,6 +677,7 @@ export function AllCards() {
           />
         </div>
         <TableNav table={table} />
+        <EditCardComponent />
       </DialogContent>
     </Dialog>
   );

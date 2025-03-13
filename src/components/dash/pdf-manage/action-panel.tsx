@@ -17,6 +17,7 @@ import Papa from "papaparse";
 import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
 import JSZip from "jszip";
+import { CreateCardDialog } from "./create-card-dialog";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -180,12 +181,15 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 }
               />
             </div>
-            <Button
-              onClick={() => cardGenMutation.mutate()}
-              // disabled={cardGenMutation.isPending}
-            >
-              Mevcut sayfadan kart oluştur
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => cardGenMutation.mutate()}
+                // disabled={cardGenMutation.isPending}
+              >
+                Mevcut sayfadan kart oluştur
+              </Button>
+              <CreateCardDialog />
+            </div>
           </CardContent>
         </Card>
 
