@@ -1,9 +1,8 @@
-import { GlobalSettings } from "@/components/global-settings";
 import { PDFDocumentProxy } from "pdfjs-dist";
 import { TextItem } from "pdfjs-dist/types/src/display/api";
 import { toast } from "sonner";
 
-export function getSystemPrompt({ settings }: { settings: GlobalSettings }) {
+export function getDefaultSystemPrompt(lang: string | undefined = "TÜRKÇE") {
   return `<SYSTEM>
 You are a LLM assistant for a student. Your job is very critical for the students success.
 
@@ -33,7 +32,7 @@ Your job is simple, yet it is very important that you understand each step and p
 				"back": "Granum"
 			}
 4. SELECT ONLY one of these card types per card. Answer in a array of objects with the type provided.
-5. ONLY ANSWER IN THE LANGUAGE OF **${settings.lang ?? "TÜRKÇE"}** in the contents of the card
+5. ONLY ANSWER IN THE LANGUAGE OF **${lang}** in the contents of the card
 6. Prefer making shorter key words or small sentences as answers 
 </SYSTEM>`;
 }

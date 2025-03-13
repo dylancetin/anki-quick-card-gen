@@ -22,14 +22,8 @@ import {
   SheetContent,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -38,13 +32,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { TooltipArrow } from "@radix-ui/react-tooltip";
-import { Check, LucideSettings2, PlusCircle, X } from "lucide-react";
+import { Check, PlusCircle, X } from "lucide-react";
 import {
   type GlobalSettings,
   globalSettingsSchema,
   openRouterProviders,
   useGlobalSettingsState,
+  usePromptState,
 } from "@/components/global-settings";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -63,26 +57,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
+import { Textarea } from "@/components/ui/textarea";
+import { getDefaultSystemPrompt } from "@/lib/prompt";
 
-export function EditOpenAIConfig() {
-  const [open, setOpen] = useState(false);
+export function EditOpenAIConfig({
+  openState: [open, setOpen],
+}: {
+  openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+}) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size={"icon"}
-            onClick={() => setOpen(true)}
-            className="rounded-full"
-          >
-            <LucideSettings2 className="text-flexoki-paper size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <TooltipArrow className="fill-border" />
-          Open-AI Ayarları
-        </TooltipContent>
-      </Tooltip>
       <SheetContent className="overflow-y-scroll w-[448px] sm:max-w-md">
         <SheetTitle>Hi</SheetTitle>
         <SheetDescription>
@@ -438,6 +423,98 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
           )}
         />
         <Button type="submit">Kaydet</Button>
+      </form>
+    </Form>
+  );
+}
+
+export function EditPromptConfig({
+  openState: [open, setOpen],
+}: {
+  openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+}) {
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetContent className="overflow-y-scroll w-[448px] sm:max-w-md">
+        <SheetTitle>Hi</SheetTitle>
+        <SheetDescription>
+          Buradan sistem prompt ayarlarını yapabilirsiniz
+        </SheetDescription>
+        {open && <PromptSettingsForm closeTab={() => setOpen(false)} />}
+        <a
+          href="https://taylan.co"
+          className="text-foreground/70 absolute left-3 bottom-3"
+        >
+          {"Taylan ™"}
+        </a>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function PromptSettingsForm({ closeTab }: { closeTab: () => void }) {
+  "use no memo";
+  const [promptValue, setPromptValue] = usePromptState();
+  const [settings] = useGlobalSettingsState();
+  const form = useForm<{ systemPrompt: string }>({
+    resolver: zodResolver(
+      z.object({
+        systemPrompt: z.string(),
+      }),
+    ),
+    defaultValues: {
+      systemPrompt: promptValue,
+    },
+  });
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(
+          (data) => {
+            setPromptValue(data.systemPrompt);
+            closeTab();
+          },
+          (e) => {
+            console.log(e);
+            for (const field in e) {
+              // @ts-ignore
+              const v = e[field] as FieldError | undefined;
+              if (!v) continue;
+              if (v?.message) toast.error(`${field} ${v.message}`);
+            }
+          },
+        )}
+        className="space-y-4 mt-8"
+      >
+        <FormField
+          control={form.control}
+          name="systemPrompt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sistem Promptu</FormLabel>
+              <FormControl>
+                <Textarea {...field} rows={30} className="w-full" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex gap-2">
+          <Button type="submit">Kaydet</Button>
+          <Button
+            type="button"
+            variant={"outline"}
+            onClick={() => {
+              form.setValue(
+                "systemPrompt",
+                getDefaultSystemPrompt(settings.lang),
+              );
+            }}
+          >
+            Default Prompt Gir
+          </Button>
+        </div>
       </form>
     </Form>
   );

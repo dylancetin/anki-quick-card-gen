@@ -5,9 +5,9 @@ import { generateObject } from "ai";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useModel } from "@/hooks/ai";
 import { toast } from "sonner";
-import { getPrompt, getSystemPrompt } from "@/lib/prompt";
+import { getPrompt } from "@/lib/prompt";
 import { Label } from "@/components/ui/label";
-import { useGlobalSettingsState } from "@/components/global-settings";
+import { usePromptState } from "@/components/global-settings";
 import { AIAnkiCard, AIAnkiCardSchema, AnkiCard, db } from "@/lib/db";
 import { useMutation } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
@@ -27,16 +27,20 @@ interface ActionsPanelProps {
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [includePreviousPageContext, setIncludePreviousPageContext] =
     useState(false);
-  const [settings, _] = useGlobalSettingsState();
   const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>([]);
   const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
+  const [systemPrompt] = usePromptState();
 
   const cardGenMutation = useMutation({
     scope: {
       id: "card-gen",
     },
     mutationFn: async () => {
+      if (systemPrompt.length < 5) {
+        toast.error("Sistem promptunda sıkıntı var");
+        throw new Error("prompt too short");
+      }
       const toastId = toast.loading(
         `Sayfa ${currentPage} AI cevabı yükleniyor`,
       );
@@ -45,7 +49,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           schema: AIAnkiCardSchema,
           model,
           mode: "json",
-          system: getSystemPrompt({ settings }),
+          system: systemPrompt,
           maxTokens: 5000,
           prompt: await getPrompt({
             includePreviousPageContext,
