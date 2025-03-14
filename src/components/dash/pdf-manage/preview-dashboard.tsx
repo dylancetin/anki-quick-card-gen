@@ -622,6 +622,7 @@ export function AllCards() {
                 onClick={() => {
                   handleCellDoubleClick(row.original, null);
                 }}
+                disabled={row.original.value.type === "Image Occlusion"}
               >
                 Düzenle
               </Button>

@@ -7,17 +7,20 @@ const BasicCardSchema = z.object({
   front: z.string(),
   back: z.string(),
 });
+export type BasicCard = z.infer<typeof BasicCardSchema>;
 
 const ClozeCardSchema = z.object({
   type: z.literal("Cloze"),
   front: z.string(),
 });
+export type ClozeCard = z.infer<typeof ClozeCardSchema>;
 
 const TypeInCardSchema = z.object({
   type: z.literal("Type-in"),
   front: z.string(),
   back: z.string(),
 });
+export type TypeInCard = z.infer<typeof TypeInCardSchema>;
 
 const ImageOcclusionCardSchema = z.object({
   type: z.literal("Image Occlusion"),
@@ -31,6 +34,7 @@ const ImageOcclusionCardSchema = z.object({
     })
     .array(),
 });
+export type ImageOcclusionCard = z.infer<typeof ImageOcclusionCardSchema>;
 
 export const AIAnkiCardSchema = z.object({
   cards: z.array(z.union([BasicCardSchema, ClozeCardSchema, TypeInCardSchema])),

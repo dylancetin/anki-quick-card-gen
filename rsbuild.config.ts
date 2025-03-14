@@ -2,6 +2,7 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 import { pluginBabel } from "@rsbuild/plugin-babel";
+import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 
 export const ReactCompilerConfig = {
   target: "19", // '17' | '18' | '19'
@@ -15,6 +16,7 @@ export default defineConfig({
         opts.plugins?.unshift("babel-plugin-react-compiler");
       },
     }),
+    pluginNodePolyfill(),
   ],
   source: {
     entry: { index: "./src/main.tsx" },

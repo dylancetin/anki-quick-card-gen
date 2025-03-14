@@ -8,16 +8,14 @@ import { toast } from "sonner";
 import { getPrompt } from "@/lib/prompt";
 import { Label } from "@/components/ui/label";
 import { usePromptState } from "@/components/global-settings";
-import { AIAnkiCard, AIAnkiCardSchema, AnkiCard, db } from "@/lib/db";
+import { AIAnkiCard, AIAnkiCardSchema } from "@/lib/db";
 import { useMutation } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { useImmer } from "use-immer";
 import { AllCards, PreviewModal } from "./preview-dashboard";
-import Papa from "papaparse";
-import { txtHead } from "@/lib/cardsTxtHead";
 import { PdfCanvasDialog } from "./image-card-editor";
-import JSZip from "jszip";
 import { CreateCardDialog } from "./create-card-dialog";
+import { downloadAllCards } from "@/lib/download-all-cards";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -78,89 +76,6 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
       }
     },
   });
-
-  async function downloadAllCards() {
-    const allCards: AnkiCard["value"][] = (await db.cards.toArray()).map(
-      (d) => d.value,
-    );
-    console.log(allCards);
-
-    // Convert the array of cards to CSV
-    const neededImagIds: string[] = [];
-    const csv = Papa.unparse(
-      allCards.map((c) => {
-        switch (c.type) {
-          case "Basic": {
-            return [c.type, c.front, c.back];
-          }
-          case "Type-in": {
-            return [c.type, c.front, c.back];
-          }
-          case "Cloze": {
-            return [c.type, c.front];
-          }
-          case "Image Occlusion": {
-            neededImagIds.push(c.imageId);
-            return [
-              c.type,
-              c.boxes
-                .map(
-                  (b, i) =>
-                    `{{c${i + 1}::image-occlusion:rect:left=${b.x}:top=${b.y}:width=${b.width}:height=${b.height}:oi=1}}`,
-                )
-                .join(" "),
-              `<img src="${c.imageId}.webp">`,
-            ];
-          }
-        }
-      }),
-      {
-        header: false,
-      },
-    );
-
-    // Create a blob from the CSV string
-    const blob = new Blob([txtHead, csv], { type: "text/txt;charset=utf-8;" });
-
-    const zip = new JSZip();
-    zip.file("cards.txt", blob);
-
-    const imgFolder = zip.folder("images");
-
-    if (!imgFolder) {
-      console.error("sometgng went terribly wrong");
-      return;
-    }
-
-    await Promise.allSettled(
-      neededImagIds.map(async (imageId) => {
-        const imageData = await db.images.get(imageId);
-        if (!imageData) {
-          return;
-        }
-        imgFolder.file(`${imageId}.webp`, imageData.image.split(",")[1], {
-          base64: true,
-        });
-      }),
-    );
-
-    // Create a link element
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(zipBlob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "all_cards.zip"); // Set the desired file name
-
-    // Append to the body (required for Firefox)
-    document.body.appendChild(link);
-
-    // Trigger the download
-    link.click();
-
-    // Clean up and remove the link
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
 
   return (
     <Card>
