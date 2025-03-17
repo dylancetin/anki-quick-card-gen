@@ -63,6 +63,16 @@ export async function getPrompt({
       .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
       .map((item) => item.str) // Extract the string from each TextItem
       .join("");
+    if (fullText.length < 30) {
+      toast.error(
+        "Page content is too short. Are you sure everything is correct?",
+        {
+          description:
+            "You can use a OCR tool to have text embeddings in your PDF file",
+        },
+      );
+      throw new Error("Too short of a content");
+    }
 
     return `<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`;
   };
