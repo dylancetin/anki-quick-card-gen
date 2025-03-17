@@ -165,7 +165,7 @@ export function GlobalSettingsStateProvider({
   useEffect(() => {
     localStorage.setItem(
       "system-prompt",
-      JSON.stringify({ prompt: promptState[1] }),
+      JSON.stringify({ prompt: promptState[0] }),
     );
   }, [promptState[0]]);
 
