@@ -21,13 +21,13 @@ export function DeleteAllButton() {
         <Button variant={"destructive"}>Delete All Cards</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete ALL Cards</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cant be retaken. Are you sure to delete all the cards!
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete ALL Cards</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cant be retaken. Are you sure to delete all the cards!
-            </AlertDialogDescription>
-          </AlertDialogHeader>
           <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
           <Button
             type="submit"
