@@ -98,7 +98,7 @@ export const TableNav = ({ table }: { table: TanstackTableType<any> }) => {
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Önceki
+          Previous
         </Button>
         <Popover>
           <PopoverTrigger>
@@ -119,12 +119,12 @@ export const TableNav = ({ table }: { table: TanstackTableType<any> }) => {
                 if (event.key === "Enter") {
                   const inputValue = event.currentTarget.value;
                   if (inputValue) {
-                    const page = Number(inputValue) - 1; // Sayfa indeksi 0'dan başladığı için 1 çıkarıyoruz
+                    const page = Number(inputValue) - 1;
                     if (page < maxPage) {
                       table.setPageIndex(page);
                     } else {
-                      toast.error("Sayfa bulunamadı", {
-                        description: `Girilen sayfa mevcut sayfa sayısından (${maxPage}) daha büyük olamaz.`,
+                      toast.error("Can't find the page", {
+                        description: `The input page cant be bigger than ${maxPage}.`,
                         duration: 2500,
                       });
                     }
@@ -140,7 +140,7 @@ export const TableNav = ({ table }: { table: TanstackTableType<any> }) => {
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Sonraki
+          Next
         </Button>
       </div>
     </div>

@@ -45,6 +45,7 @@ import { ReactNode } from "@tanstack/react-router";
 import { Updater } from "use-immer";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Textarea } from "@/components/ui/textarea";
+import { DeleteAllButton } from "./delete-all-cards";
 
 const renderStringWithHighlight = (str: string) => {
   const regex = /{{(c\d+)::(.*?)}}/g;
@@ -662,13 +663,18 @@ export function AllCards() {
     <Dialog>
       <DialogTrigger asChild>
         <Button className="w-full" variant={"cyan"}>
-          Bütün kartlar
+          All Cards
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
-        <DialogHeader>
-          <DialogTitle>Depodaki tüm kartlar</DialogTitle>
-          <DialogDescription>Bütün Kartların</DialogDescription>
+        <DialogHeader className="flex justify-between w-full flex-row pr-8 pt-8">
+          <div className="space-y-4">
+            <DialogTitle>All cards on the depot</DialogTitle>
+            <DialogDescription>
+              All the cards currently available to be downloaded.
+            </DialogDescription>
+          </div>
+          <DeleteAllButton />
         </DialogHeader>
         <div className="rounded-md border max-w-full overflow-x-scroll">
           <Datatable

@@ -52,7 +52,7 @@ export function CreateCardDialog() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button>Kart Ekle</Button>
+        <Button>Create a Card</Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-[500px]">
         <AlertDialogHeader>

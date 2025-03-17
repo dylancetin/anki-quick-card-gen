@@ -23,7 +23,7 @@ const modelIds = {
   "Image Occlusion Enhanced": 1713160726185,
 } as const;
 
-export async function downloadAllCards() {
+export async function downloadAllCards(deckName: string) {
   try {
     // Initialize SQL.js (loads the WebAssembly SQLite implementation)
     const wasmURL = new URL("sql.js/dist/sql-wasm.wasm", import.meta.url);
@@ -48,7 +48,7 @@ export async function downloadAllCards() {
     const timestamp = Math.floor(Date.now() / 1000);
 
     // Initialize the collection with default values
-    initializeCollection(sqlDb, timestamp, "testdeckname");
+    initializeCollection(sqlDb, timestamp, deckName);
 
     // Process all cards and add them to the database
     for (const card of allCards) {

@@ -114,7 +114,7 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
           <Popover>
             <PopoverTrigger>
               <span className="self-center">
-                Sayfa {currentPage}/{numPages}
+                Page {currentPage}/{numPages}
               </span>
             </PopoverTrigger>
             <PopoverContent

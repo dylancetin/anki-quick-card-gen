@@ -15,7 +15,7 @@ import { useImmer } from "use-immer";
 import { AllCards, PreviewModal } from "./preview-dashboard";
 import { PdfCanvasDialog } from "./image-card-editor";
 import { CreateCardDialog } from "./create-card-dialog";
-import { downloadAllCards } from "@/lib/download-all-cards";
+import { DownloadAllButton } from "./download-all-dialog";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -85,16 +85,15 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         previewCards={previewCards}
         setPreviewCards={setPreviewCards}
       />
-
       <CardHeader>
         <CardTitle>Actions</CardTitle>
       </CardHeader>
       <CardContent className="block space-y-4">
         <Card>
           <CardContent className="block space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4">
               <Label className="text-lg block">
-                Bir önceki sayfayı bağlama ekle
+                Add previous page to the context
               </Label>
               <Switch
                 checked={includePreviousPageContext}
@@ -108,7 +107,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 onClick={() => cardGenMutation.mutate()}
                 // disabled={cardGenMutation.isPending}
               >
-                Mevcut sayfadan kart oluştur
+                Create Cards from Current Page
               </Button>
               <CreateCardDialog />
             </div>
@@ -121,17 +120,11 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             className="w-full"
             variant={"purple"}
           >
-            Önizleme tablosunu aç
+            Open Preview Table
           </Button>
           <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
           <AllCards />
-          <Button
-            onClick={downloadAllCards}
-            className="w-full"
-            variant={"green"}
-          >
-            Kartları indir
-          </Button>
+          <DownloadAllButton />
         </div>
       </CardContent>
     </Card>

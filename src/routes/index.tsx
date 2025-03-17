@@ -36,12 +36,18 @@ function HomeComponent() {
           <h1 className="text-2xl font-semibold"></h1>
           <Card>
             <CardHeader>
-              <CardTitle>Bir pdf yükleyerek başla</CardTitle>
+              <CardTitle>Start by uploading a PDF file</CardTitle>
               <FileUpload
                 value={file}
                 valueOnChange={setFile}
                 accept="application/pdf"
               />
+              <a
+                href="https://taylan.co"
+                className="text-foreground/70 absolute left-3 bottom-3"
+              >
+                {"Taylan ™"}
+              </a>
             </CardHeader>
           </Card>
         </TabsContent>
