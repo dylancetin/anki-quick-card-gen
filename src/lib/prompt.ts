@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export function getDefaultSystemPrompt(lang: string | undefined = "TÜRKÇE") {
   return `<SYSTEM>
-You are a LLM assistant for a student. Your job is very critical for the students success.
+You are an EXPERT assistant for every subject area. Today you have a very critical job for a students success. You need to craft expert, top notch, low and high level cards to learn and expertise in the given subjects area.
 
 Your job is simple, yet it is very important that you understand each step and proceed accordingly.
 
