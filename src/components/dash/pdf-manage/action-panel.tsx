@@ -103,10 +103,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button
-                onClick={() => cardGenMutation.mutate()}
-                // disabled={cardGenMutation.isPending}
-              >
+              <Button onClick={() => cardGenMutation.mutate()}>
                 Create Cards from Current Page
               </Button>
               <CreateCardDialog />

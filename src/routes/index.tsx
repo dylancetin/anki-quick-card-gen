@@ -44,7 +44,7 @@ function HomeComponent() {
               />
               <a
                 href="https://taylan.co"
-                className="text-foreground/70 absolute left-3 bottom-3"
+                className="text-foreground/70 pt-4 w-fit"
               >
                 {"Taylan ™"}
               </a>
