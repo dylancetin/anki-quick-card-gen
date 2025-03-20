@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { getPrompt } from "@/lib/prompt";
 import { Label } from "@/components/ui/label";
 import { usePromptState } from "@/components/global-settings";
-import { AIAnkiCard, AIAnkiCardSchema } from "@/lib/db";
+import { AIAnkiCardSchema, PreviewCard } from "@/lib/db";
 import { useMutation } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { useImmer } from "use-immer";
@@ -25,16 +25,19 @@ interface ActionsPanelProps {
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [includePreviousPageContext, setIncludePreviousPageContext] =
     useState(false);
-  const [previewCards, setPreviewCards] = useImmer<AIAnkiCard["cards"]>([]);
+  const [previewCards, setPreviewCards] = useImmer<PreviewCard>([]);
   const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
   const [systemPrompt] = usePromptState();
 
   const cardGenMutation = useMutation({
-    scope: {
-      id: "card-gen",
-    },
-    mutationFn: async () => {
+    mutationFn: async ({
+      currentPage,
+      includePreviousPageContext,
+    }: {
+      currentPage: number;
+      includePreviousPageContext: boolean;
+    }): Promise<void> => {
       if (systemPrompt.length < 5) {
         toast.error("Sistem promptunda sıkıntı var");
         throw new Error("prompt too short");
@@ -57,7 +60,12 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         });
         AIAnkiCardSchema.parse(object);
         setPreviewCards((d) => {
-          d.push(...object.cards);
+          d.push(
+            ...object.cards.map((e) => ({
+              ...e,
+              page: currentPage,
+            })),
+          );
         });
         toast.success(`Sayfa ${currentPage} AI Kartları yüklendi`, {
           id: toastId,
@@ -103,7 +111,14 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => cardGenMutation.mutate()}>
+              <Button
+                onClick={() =>
+                  cardGenMutation.mutate({
+                    currentPage,
+                    includePreviousPageContext,
+                  })
+                }
+              >
                 Create Cards from Current Page
               </Button>
               <CreateCardDialog />

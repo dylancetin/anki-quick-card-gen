@@ -1,4 +1,4 @@
-import { AIAnkiCard, AnkiCard, db } from "@/lib/db";
+import { AIAnkiCard, AnkiCard, db, PreviewCard } from "@/lib/db";
 import {
   useRef,
   useMemo,
@@ -104,8 +104,8 @@ export function PreviewModal({
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  previewCards: AIAnkiCard["cards"];
-  setPreviewCards: Updater<AIAnkiCard["cards"]>;
+  previewCards: PreviewCard;
+  setPreviewCards: Updater<PreviewCard>;
 }) {
   "use no memo";
   function saveToDB(card: AIAnkiCard["cards"][number]) {
@@ -233,6 +233,12 @@ export function PreviewModal({
       pagination: {
         pageSize: PREVIEW_PAGE_SIZE,
       },
+      sorting: [
+        {
+          id: "page",
+          desc: false,
+        },
+      ],
     },
   });
 
@@ -284,6 +290,7 @@ export function PreviewModal({
             type: card.type,
             front: frontContent,
             back: backContent,
+            page: card.page,
           };
         }
 
