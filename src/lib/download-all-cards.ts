@@ -56,7 +56,7 @@ export async function downloadAllCards(deckName: string) {
     }
 
     // Create and download the .apkg file
-    await packageAndDownload(sqlDb, mediaMap);
+    await packageAndDownload(sqlDb, mediaMap, deckName);
   } catch (error) {
     console.error("Error creating Anki package:", error);
   }
@@ -298,7 +298,7 @@ function addClozeCard(
     sqlDb.run(
       "INSERT INTO cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
-        cardId + i, // id
+        cardId.toString() + i.toString(), // id
         noteId, // nid
         1, // did
         clozeIndex - 1, // ord (cloze index - 1)
@@ -455,6 +455,7 @@ async function addImageOcclusionCard(
 async function packageAndDownload(
   sqlDb: Database,
   mediaMap: Record<string, any>,
+  deckName: string,
 ) {
   // Export the database to binary
   const dbBuffer = sqlDb.export();
@@ -485,7 +486,7 @@ async function packageAndDownload(
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.href = url;
-  link.download = "anki_cards.apkg";
+  link.download = `${deckName}-anki-cards.apkg`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
