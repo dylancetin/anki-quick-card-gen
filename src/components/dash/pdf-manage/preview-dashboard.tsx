@@ -136,7 +136,7 @@ export function PreviewModal({
       },
       {
         accessorKey: "page",
-        header: "Tür",
+        header: "Sayfa",
       },
       {
         header: "Ön-Yüz",
