@@ -1,4 +1,4 @@
-import { AIAnkiCard, AnkiCard, db, PreviewCard } from "@/lib/db";
+import { AnkiCard, db, PreviewCard } from "@/lib/db";
 import {
   useRef,
   useMemo,
@@ -104,12 +104,15 @@ export function PreviewModal({
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  previewCards: PreviewCard;
-  setPreviewCards: Updater<PreviewCard>;
+  previewCards: PreviewCard[];
+  setPreviewCards: Updater<PreviewCard[]>;
 }) {
   "use no memo";
-  function saveToDB(card: AIAnkiCard["cards"][number]) {
-    db.cards.add({ value: card });
+  function saveToDB(card: PreviewCard) {
+    const { page: _, ...value } = card;
+    db.cards.add({
+      value,
+    });
   }
 
   // State for the edit dialog
@@ -125,10 +128,14 @@ export function PreviewModal({
     setEditDialogOpen(true);
   };
 
-  const columns: ColumnDef<AIAnkiCard["cards"][number]>[] = useMemo(
+  const columns: ColumnDef<PreviewCard>[] = useMemo(
     () => [
       {
         accessorKey: "type",
+        header: "Tür",
+      },
+      {
+        accessorKey: "page",
         header: "Tür",
       },
       {

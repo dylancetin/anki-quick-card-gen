@@ -25,7 +25,7 @@ interface ActionsPanelProps {
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [includePreviousPageContext, setIncludePreviousPageContext] =
     useState(false);
-  const [previewCards, setPreviewCards] = useImmer<PreviewCard>([]);
+  const [previewCards, setPreviewCards] = useImmer<PreviewCard[]>([]);
   const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
   const [systemPrompt] = usePromptState();
