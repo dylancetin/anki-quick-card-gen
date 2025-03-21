@@ -372,7 +372,7 @@ export function PreviewModal({
             Kartları burdan onaylayıp kaydet
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-md border max-w-full overflow-x-scroll">
+        <div className="rounded-md border max-w-full overflow-x-scroll min-h-[432px]">
           <Datatable isLoading={false} table={table} columns={columns} />
         </div>
         <TableNav table={table} />
@@ -690,7 +690,7 @@ export function AllCards() {
           </div>
           <DeleteAllButton />
         </DialogHeader>
-        <div className="rounded-md border max-w-full overflow-x-scroll">
+        <div className="rounded-md border max-w-full overflow-x-scroll min-h-[528px]">
           <Datatable
             isLoading={false}
             table={table}
