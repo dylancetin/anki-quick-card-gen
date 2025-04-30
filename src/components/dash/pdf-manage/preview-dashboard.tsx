@@ -7,6 +7,8 @@ import {
   useState,
   useEffect,
   useCallback,
+  Suspense,
+  lazy,
 } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +38,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Datatable } from "@/components/custom-ui/datatable";
 import { TableNav } from "@/components/custom-ui/datatable";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -47,28 +48,7 @@ import { Updater } from "use-immer";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Textarea } from "@/components/ui/textarea";
 import { DeleteAllButton } from "./delete-all-cards";
-
-const renderStringWithHighlight = (str: string) => {
-  const regex = /{{(c\d+)::(.*?)}}/g;
-  const parts = str.split(regex);
-  return (
-    <>
-      {parts.map((part, index) => {
-        if (index % 3 === 0) {
-          return <span key={index}>{part}</span>; // Regular text
-        } else if (index % 3 === 1) {
-          return (
-            <Badge
-              className="inline"
-              key={index}
-            >{`${parts[index + 1]} (${part.replace("c", "")})`}</Badge>
-          ); // Highlighted text
-        }
-        return null; // Skip the second capturing group
-      })}
-    </>
-  );
-};
+const Markdown = lazy(() => import("@/components/markdown"));
 
 function RenderTooltipContent({
   content,
@@ -90,7 +70,9 @@ function RenderTooltipContent({
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
-        <p className="max-w-96 text-wrap inline-flex flex-wrap">{content}</p>
+        <Suspense fallback={<span>loading</span>}>
+          <Markdown content={content} />
+        </Suspense>
       </TooltipContent>
     </Tooltip>
   );
@@ -158,7 +140,7 @@ export function PreviewModal({
           if (row.original.type === "Cloze") {
             return (
               <RenderTooltipContent
-                content={renderStringWithHighlight(row.original.front)}
+                content={row.original.front}
                 onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
                 doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
               />
@@ -595,7 +577,7 @@ export function AllCards() {
           if (row.original.value.type === "Cloze") {
             return (
               <RenderTooltipContent
-                content={renderStringWithHighlight(row.original.value.front)}
+                content={row.original.value.front}
                 onDoubleClick={() =>
                   handleCellDoubleClick(row.original, "front")
                 }
