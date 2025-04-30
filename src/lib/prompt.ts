@@ -32,6 +32,7 @@ Your job is simple, yet it is very important that you understand each step and p
 				"back": "Granum"
 			}
 4. SELECT ONLY one of these card types per card. Answer in a array of objects with the type provided.
+5. You can use $ for inline, $$ + new line for Latec. You can use valid math and katex/mhchem (for organic chemistry) syntax.
 5. ONLY ANSWER IN THE LANGUAGE OF **${lang}** in the contents of the card
 6. Prefer making shorter key words or small sentences as answers 
 </SYSTEM>`;
