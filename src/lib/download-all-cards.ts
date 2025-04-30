@@ -15,7 +15,7 @@ const modelIds = {
   "Type-in": 1692999971515,
   "Basic-f752e": 1525456532501,
   "Basic (and reversed card)+": 1689757495603,
-  Basic: 1692999971512,
+  Basic: 1746001256852, // 1692999971512, changed for markdown + katext support
   "Basic (and reversed card)": 1692999971513,
   "Basic (optional reversed card)": 1692999971514,
   Cloze: 1692999971516,
