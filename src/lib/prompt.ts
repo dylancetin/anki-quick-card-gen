@@ -39,44 +39,56 @@ Your job is simple, yet it is very important that you understand each step and p
 }
 
 export async function getPrompt({
-  includePreviousPageContext,
+  includePagesContext,
   currentPage,
   pdfDoc,
 }: {
-  includePreviousPageContext: boolean;
+  includePagesContext: number;
   currentPage: number;
   pdfDoc: PDFDocumentProxy | null;
-}) {
+}): Promise<string | undefined> {
   if (!pdfDoc) {
-    toast.error("PDF Dökümanı yüklenemedi sayfayı yeniyelin");
+    toast.error("PDF document could not be loaded — please refresh the page.");
     return;
   }
-  const previousPageContent = async () => {
-    const page = await pdfDoc.getPage(currentPage - 1);
+
+  // helper to pull raw text from any page and wrap it in tags
+  const extractPage = async (
+    pageNum: number,
+    tagName: string,
+  ): Promise<string> => {
+    if (pageNum < 1) return "";
+
+    const page = await pdfDoc.getPage(pageNum);
     const textContent = await page.getTextContent();
-    return `<PREVIOUS_PAGE_CONTEXT>${textContent}</PREVIOUS_PAGE_CONTEXT>\n\n`;
-  };
-  const pageContent = async () => {
-    const page = await pdfDoc.getPage(currentPage);
-    const textContent = await page.getTextContent();
-    // console.log(textContent);
     const fullText = textContent.items
-      .filter((item): item is TextItem => "str" in item) // Type guard to filter TextItem
-      .map((item) => item.str) // Extract the string from each TextItem
+      .filter((item): item is TextItem => "str" in item)
+      .map((item) => item.str)
       .join("");
-    if (fullText.length < 30) {
-      toast.error(
-        "Page content is too short. Are you sure everything is correct?",
-        {
-          description:
-            "You can use a OCR tool to have text embeddings in your PDF file",
-        },
-      );
-      throw new Error("Too short of a content");
+
+    if (fullText.length < 10) {
+      // you can decide whether to toast here or just throw
+      toast.error(`Page ${pageNum} is too short for reliable context.`, {
+        description:
+          "You may need to OCR your PDF or verify this page has selectable text.",
+      });
+      throw new Error(`Page ${pageNum} text too short`);
     }
 
-    return `<PAGE_CONTENT>${fullText}</PAGE_CONTENT>\n\n`;
+    return `<${tagName}>${fullText}</${tagName}>\n\n`;
   };
 
-  return `${includePreviousPageContext ? await previousPageContent() : ""}${await pageContent()}`;
+  let prompt = "";
+
+  // walk backwards for as many pages as requested
+  for (let offset = includePagesContext; offset >= 1; offset--) {
+    const pageToGrab = currentPage - offset;
+    if (pageToGrab < 1) continue;
+    prompt += await extractPage(pageToGrab, "PREVIOUS_PAGE_CONTEXT");
+  }
+
+  // finally, add the actual current page
+  prompt += await extractPage(currentPage, "PAGE_CONTENT");
+
+  return prompt;
 }
