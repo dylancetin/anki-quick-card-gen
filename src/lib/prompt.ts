@@ -84,7 +84,7 @@ export async function getPrompt({
   for (let offset = includePagesContext; offset >= 1; offset--) {
     const pageToGrab = currentPage - offset;
     if (pageToGrab < 1) continue;
-    prompt += await extractPage(pageToGrab, "PREVIOUS_PAGE_CONTEXT");
+    prompt += await extractPage(pageToGrab, "PAGE_CONTEXT");
   }
 
   // finally, add the actual current page
