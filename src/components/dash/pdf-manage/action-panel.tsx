@@ -52,9 +52,8 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         throw new Error("prompt too short");
       }
       const toastId = toast.loading(
-        `Sayfa ${currentPage} AI cevabı yükleniyor`,
+        `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}` : ""}}${currentPage} AI cevabı yükleniyor`,
       );
-      setStartCounting(false);
       try {
         const { object } = await generateObject({
           schema: AIAnkiCardSchema,
@@ -150,12 +149,15 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() =>
+                onClick={() => {
                   cardGenMutation.mutate({
                     currentPage,
                     includePagesContext,
-                  })
-                }
+                  });
+                  setStartCounting(false);
+                  setStartCountingPage(0);
+                  setIncludePagesContext(0);
+                }}
               >
                 Create Cards from Current Page
               </Button>
