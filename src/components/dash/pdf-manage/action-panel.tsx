@@ -52,7 +52,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         throw new Error("prompt too short");
       }
       const toastId = toast.loading(
-        `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}` : ""}}${currentPage} AI cevabı yükleniyor`,
+        `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
       );
       try {
         const { object } = await generateObject({
@@ -76,13 +76,16 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             })),
           );
         });
-        toast.success(`Sayfa ${currentPage} AI Kartları yüklendi`, {
-          id: toastId,
-          duration: 4000,
-        });
+        toast.success(
+          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI Kartları yüklendi`,
+          {
+            id: toastId,
+            duration: 4000,
+          },
+        );
       } catch (error) {
         toast.error(
-          `Sayfa ${currentPage} kartları yüklenirken bir sorun oluştu`,
+          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} kartları yüklenirken bir sorun oluştu`,
           {
             id: toastId,
             duration: 4000,
