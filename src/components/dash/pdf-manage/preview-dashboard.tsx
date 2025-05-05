@@ -70,9 +70,7 @@ function RenderTooltipContent({
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
-        <Suspense fallback={<span>loading</span>}>
-          <Markdown content={content} />
-        </Suspense>
+        <Markdown content={content} />
       </TooltipContent>
     </Tooltip>
   );

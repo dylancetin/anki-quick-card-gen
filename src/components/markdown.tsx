@@ -13,6 +13,7 @@ import {
 } from "marked";
 import hljs from "highlight.js";
 import katex from "katex";
+import { useQuery } from "@tanstack/react-query";
 
 const inlineRuleNonStandard =
   /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1/; // Non-standard, even if there are no spaces before and after $ or $$, try to parse
@@ -93,8 +94,8 @@ interface ClozeToken {
   index: string;
   text: string;
 }
+
 const getHtml = async (content: string) => {
-  // 1) Configure marked.  smartypants isn't in the TS defs, so we cast.
   const options = {
     gfm: true,
     breaks: true,
@@ -153,7 +154,14 @@ const getHtml = async (content: string) => {
 };
 
 export const Markdown: React.FC<{ content: string }> = ({ content }) => {
-  const html = use(getHtml(content));
+  const { data: html, isSuccess } = useQuery({
+    queryKey: ["markdown-html", content],
+    queryFn: (e) => getHtml(e.queryKey[1]),
+  });
+
+  if (!isSuccess) {
+    return <span>loading</span>;
+  }
 
   return (
     <div className="markdown-body" dangerouslySetInnerHTML={{ __html: html }} />
