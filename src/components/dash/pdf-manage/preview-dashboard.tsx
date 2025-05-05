@@ -175,7 +175,6 @@ export function PreviewModal({
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant="blue"
                 onClick={() => {
                   setEditingRowIndex(row.index);
                   setEditFocusField(null);
@@ -191,6 +190,7 @@ export function PreviewModal({
                     d.splice(row.index, 1);
                   });
                 }}
+                variant="blue"
                 size={"sm"}
               >
                 Kaydet
