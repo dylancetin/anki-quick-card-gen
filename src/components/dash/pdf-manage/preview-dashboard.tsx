@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ReactNode } from "@tanstack/react-router";
 import { Updater } from "use-immer";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/lib/use-live-query";
 import { Textarea } from "@/components/ui/textarea";
 import { DeleteAllButton } from "./delete-all-cards";
 const Markdown = lazy(() => import("@/components/markdown"));

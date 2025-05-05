@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { usePromptState } from "@/components/global-settings";
 import { AIAnkiCardSchema, PreviewCard } from "@/lib/db";
 import { useMutation } from "@tanstack/react-query";
-import { useImmer } from "use-immer";
+import { useImmer } from "@/lib/use-immer";
 import { AllCards, PreviewModal } from "./preview-dashboard";
 import { PdfCanvasDialog } from "./image-card-editor";
 import { CreateCardDialog } from "./create-card-dialog";
