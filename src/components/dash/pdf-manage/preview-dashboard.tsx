@@ -66,11 +66,15 @@ function RenderTooltipContent({
           className={`${doTruncate ? "truncate" : "text-wrap"} max-w-96 cursor-pointer`}
           onDoubleClick={onDoubleClick}
         >
-          <Markdown content={content} />
+          <Suspense fallback={"loading..."}>
+            <Markdown content={content} />
+          </Suspense>
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
-        <Markdown content={content} />
+        <Suspense fallback={"loading"}>
+          <Markdown content={content} />
+        </Suspense>
       </TooltipContent>
     </Tooltip>
   );
