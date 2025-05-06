@@ -66,7 +66,7 @@ function RenderTooltipContent({
           className={`${doTruncate ? "truncate" : "text-wrap"} max-w-96 cursor-pointer`}
           onDoubleClick={onDoubleClick}
         >
-          {content}
+          <Markdown content={content} />
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-96 text-wrap">
@@ -354,9 +354,7 @@ export function PreviewModal({
             Kartları burdan onaylayıp kaydet
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-md border max-w-full overflow-x-scroll min-h-[432px]">
-          <Datatable isLoading={false} table={table} columns={columns} />
-        </div>
+        <Datatable isLoading={false} table={table} columns={columns} />
         <TableNav table={table} />
         <EditCardComponent />
       </DialogContent>
@@ -672,13 +670,12 @@ export function AllCards() {
           </div>
           <DeleteAllButton />
         </DialogHeader>
-        <div className="rounded-md border max-w-full overflow-x-scroll min-h-[528px]">
-          <Datatable
-            isLoading={false}
-            table={table}
-            columns={allCardsColumns}
-          />
-        </div>
+        <Datatable
+          isLoading={false}
+          table={table}
+          columns={allCardsColumns}
+          className="rounded-md border max-w-full overflow-x-scroll min-h-[528px]"
+        />
         <TableNav table={table} />
         <EditCardComponent />
       </DialogContent>

@@ -19,19 +19,51 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   isLoading: boolean;
   table: TableType<any>;
   columns: ColumnDef<any>[];
+  className?: string;
 }
 
-export const Datatable = ({ isLoading, table, columns }: Props) => {
+export const Datatable = ({ isLoading, table, columns, className }: Props) => {
   "use no memo";
+  const [loadingSkeletonHeight, setLoadingSkeletonHeight] =
+    useState<number>(550);
+
+  const tableRef = useRef<HTMLTableElement>(null);
+  const firstLoad = useRef(true);
+  const currentPage = table.getState().pagination.pageIndex;
+
+  useEffect(() => {
+    if (!tableRef.current) {
+      return;
+    }
+    const h = tableRef.current.clientHeight;
+
+    if (h > 200 && h !== loadingSkeletonHeight) {
+      setLoadingSkeletonHeight(h);
+    }
+
+    if (currentPage === 0 || firstLoad.current) {
+      tableRef.current.style.minHeight = `${h}px`;
+      firstLoad.current = false;
+    }
+  }, [tableRef, isLoading, firstLoad]);
+
   return (
-    <>
+    <div
+      className={cn("rounded-md border max-w-full min-h-[432px]", className)}
+      ref={tableRef}
+    >
       {isLoading ? (
-        <Skeleton className="h-[550px] w-full" />
+        <Skeleton
+          className="h-[550px] w-full"
+          style={{ minHeight: `${loadingSkeletonHeight}px` }}
+        />
       ) : (
         <Table>
           <TableHeader>
@@ -82,7 +114,7 @@ export const Datatable = ({ isLoading, table, columns }: Props) => {
           </TableBody>
         </Table>
       )}
-    </>
+    </div>
   );
 };
 
