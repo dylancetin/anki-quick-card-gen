@@ -80,7 +80,7 @@ function RenderTooltipContent({
   );
 }
 
-const PREVIEW_PAGE_SIZE = 8;
+const PREVIEW_PAGE_SIZE = 10;
 export function PreviewModal({
   open,
   setOpen,
@@ -122,6 +122,15 @@ export function PreviewModal({
       {
         accessorKey: "page",
         header: "Sayfa",
+        cell: ({ row }) => {
+          return (
+            <span>
+              {row.original.fromPage
+                ? `${row.original.fromPage}-${row.original.page}`
+                : row.original.page}
+            </span>
+          );
+        },
       },
       {
         header: "Ön-Yüz",
@@ -352,11 +361,21 @@ export function PreviewModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
-        <DialogHeader>
-          <DialogTitle>Kartları incele ve depoya ekle</DialogTitle>
-          <DialogDescription>
-            Kartları burdan onaylayıp kaydet
-          </DialogDescription>
+        <DialogHeader className="flex justify-between w-full flex-row pr-8 pt-8">
+          <div className="space-y-4">
+            <DialogTitle>Kartları incele ve depoya ekle</DialogTitle>
+            <DialogDescription>
+              Kartları burdan onaylayıp kaydet
+            </DialogDescription>
+          </div>
+          <Button
+            variant={"destructive"}
+            onClick={() => {
+              setPreviewCards([]);
+            }}
+          >
+            Delete All Cards
+          </Button>
         </DialogHeader>
         <Datatable isLoading={false} table={table} columns={columns} />
         <TableNav table={table} />

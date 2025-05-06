@@ -26,7 +26,24 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [includePagesContext, setIncludePagesContext] = useState<number>(0);
   const [startCounting, setStartCounting] = useState(false);
   const [startCountingPage, setStartCountingPage] = useState(0);
-  const [previewCards, setPreviewCards] = useImmer<PreviewCard[]>([]);
+  const [previewCards, setPreviewCards] = useImmer<PreviewCard[]>(() => {
+    const saved = localStorage.getItem("preview-cards");
+    if (saved) {
+      try {
+        const j = JSON.parse(saved);
+        if (Array.isArray(j)) {
+          return j;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return [];
+  });
+  useEffect(() => {
+    localStorage.setItem("preview-cards", JSON.stringify(previewCards));
+  }, [previewCards.length]);
+
   const [openPreview, setOpenPreview] = useState(false);
   const model = useModel();
   const [systemPrompt] = usePromptState();
@@ -73,6 +90,9 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             ...object.cards.map((e) => ({
               ...e,
               page: currentPage,
+              fromPage: includePagesContext
+                ? currentPage - includePagesContext
+                : undefined,
             })),
           );
         });

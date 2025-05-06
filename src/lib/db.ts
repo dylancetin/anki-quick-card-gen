@@ -41,7 +41,8 @@ export const AIAnkiCardSchema = z.object({
 });
 
 export type AIAnkiCard = z.infer<typeof AIAnkiCardSchema>;
-export type PreviewCard = { page: number; front: string } & (
+
+export type PreviewCard = { page: number; fromPage?: number; front: string } & (
   | {
       type: "Basic";
       back: string;
