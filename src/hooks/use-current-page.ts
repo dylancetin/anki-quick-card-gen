@@ -1,4 +1,3 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/db";
 import { PDFDocumentProxy } from "pdfjs-dist";
@@ -31,6 +30,9 @@ export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
         }
         setPdfFileDbId(pdf.id);
         await db.pdfs.update(pdf.id, { lastUsed: Date.now() });
+        if (savePdf && !pdf.file) {
+          await db.pdfs.update(pdf.id, { file: file });
+        }
         return;
       }
       const res = await db.pdfs.add({
