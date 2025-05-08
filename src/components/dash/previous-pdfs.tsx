@@ -94,7 +94,8 @@ export function PreviousPDF({
     db.pdfs
       .limit(6)
       .filter((f) => !!f.file)
-      .toArray(),
+      .reverse()
+      .sortBy("lastUsed"),
   );
 
   const onSelect: (pdf: PdfFile) => void = (pdf) => {
@@ -107,6 +108,12 @@ export function PreviousPDF({
 
   return (
     <div className="grid grid-cols-3 gap-4">
+      {oldPdfs.length > 4 ? (
+        <p>
+          6'dan fazla pdf'i sistemde kayıtlı bırakmamanızı öneririz. PDF'ler
+          kullandığınız browser üzerinde saklanmaktadır.
+        </p>
+      ) : null}
       {oldPdfs.map((pdf) => (
         <PreviousPdfCard key={pdf.id} pdf={pdf} onSelect={onSelect} />
       ))}

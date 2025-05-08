@@ -4,16 +4,19 @@ import { db } from "@/lib/db";
 import { PDFDocumentProxy } from "pdfjs-dist";
 
 export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
-  const { currentPage } = useSearch({
-    from: "/",
-  });
+  const [currentPage, setCurrentPage] = useState<undefined | number>();
   const [file, setFile] = useState<File | undefined>(undefined);
   const [pdfFileDbId, setPdfFileDbId] = useState<number | undefined>(undefined);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!file) return;
-  }, [pdfFileDbId]);
+    if (!pdfFileDbId || !currentPage) return;
+    const updateLatestUsed = async () => {
+      await db.pdfs.update(pdfFileDbId, {
+        sessionRestorePageIndex: currentPage,
+      });
+    };
+    updateLatestUsed();
+  }, [currentPage, pdfFileDbId]);
 
   useEffect(() => {
     if (!file) return;
@@ -24,11 +27,10 @@ export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
       });
       if (pdf) {
         if (pdf.sessionRestorePageIndex) {
-          navigate({
-            from: "/",
-            search: { currentPage: pdf.sessionRestorePageIndex },
-          });
+          setCurrentPage(pdf.sessionRestorePageIndex);
         }
+        setPdfFileDbId(pdf.id);
+        await db.pdfs.update(pdf.id, { lastUsed: Date.now() });
         return;
       }
       const res = await db.pdfs.add({
@@ -42,14 +44,7 @@ export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
     saveAndRestorePdf();
   }, [file, savePdf, setPdfFileDbId]);
 
-  return [
-    currentPage ?? 1,
-    (n: number) => {
-      navigate({ from: "/", search: { currentPage: n } });
-    },
-    file,
-    setFile,
-  ] as const;
+  return [currentPage ?? 1, setCurrentPage, file, setFile] as const;
 };
 
 export const useCreatePreviewImg = (
