@@ -80,12 +80,25 @@ const db = new Dexie("Local-Fake-AnkiDB") as Dexie & {
     },
     "id"
   >;
+  pdfs: EntityTable<
+    {
+      id: number;
+      fileName: string;
+      fileSize: number;
+      file?: File;
+      previewImage?: Blob;
+      sessionRestorePageIndex?: number;
+      lastUsed: number;
+    },
+    "id"
+  >;
 };
 
 // Schema declaration:
-db.version(2).stores({
+db.version(4).stores({
   cards: "++id", // primary key "id" (for the runtime!)
   images: "id",
+  pdfs: "++id, [fileName+fileSize]",
 });
 
 export type { AnkiCard };

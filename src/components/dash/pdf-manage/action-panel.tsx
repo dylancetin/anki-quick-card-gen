@@ -41,7 +41,11 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
     return [];
   });
   useEffect(() => {
-    localStorage.setItem("preview-cards", JSON.stringify(previewCards));
+    try {
+      localStorage.setItem("preview-cards", JSON.stringify(previewCards));
+    } catch (e) {
+      toast.error("Local storeage full");
+    }
   }, [previewCards.length]);
 
   const [openPreview, setOpenPreview] = useState(false);

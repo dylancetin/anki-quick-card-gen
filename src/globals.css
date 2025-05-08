@@ -319,9 +319,7 @@
 	::file-selector-button {
 		border-color: var(--color-gray-200, currentcolor);
 	}
-}
 
-@layer base {
 	:root {
 		--flexoki-bg: 100 100% 100;
 		--flexoki-bg-2: 51 33% 92%;
@@ -461,4 +459,13 @@
 
 .cloze:hover {
 	background-color: #ffa500;
+}
+
+.card-overlay-gradient {
+	background-image: linear-gradient(
+		to top,
+		#4385be,
+		cubic-bezier(0.48, 0.3, 0.64, 1),
+		#92bfdb00
+	);
 }

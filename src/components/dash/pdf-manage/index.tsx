@@ -10,12 +10,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { useCurrentPage } from "@/hooks/use-current-page";
+import { useCreatePreviewImg } from "@/hooks/use-current-page";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-export function ManagePDFDash({ file }: { file: File | undefined }) {
-  const [currentPage, setCurrentPage] = useCurrentPage();
+export function ManagePDFDash({
+  file,
+  currentPage,
+  setCurrentPage,
+}: {
+  file: File | undefined;
+  currentPage: number;
+  setCurrentPage: (e: number) => void;
+}) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -48,6 +55,8 @@ export function ManagePDFDash({ file }: { file: File | undefined }) {
       pdfDoc?.destroy();
     };
   }, [file]);
+
+  useCreatePreviewImg(pdfDoc, file);
 
   useEffect(() => {
     const renderPage = async () => {

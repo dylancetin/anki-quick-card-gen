@@ -60,6 +60,7 @@ import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { getDefaultSystemPrompt } from "@/lib/prompt";
+import { useMemo } from "react";
 
 export function EditOpenAIConfig({
   openState: [open, setOpen],
@@ -444,6 +445,10 @@ function PromptSettingsForm({ closeTab }: { closeTab: () => void }) {
   "use no memo";
   const [promptValue, setPromptValue] = usePromptState();
   const [settings] = useGlobalSettingsState();
+  const defaultPromp = useMemo(
+    () => getDefaultSystemPrompt(settings.lang),
+    [settings.lang],
+  );
   const form = useForm<{ systemPrompt: string }>({
     resolver: zodResolver(
       z.object({
@@ -493,11 +498,9 @@ function PromptSettingsForm({ closeTab }: { closeTab: () => void }) {
           <Button
             type="button"
             variant={"outline"}
+            disabled={defaultPromp === promptValue}
             onClick={() => {
-              form.setValue(
-                "systemPrompt",
-                getDefaultSystemPrompt(settings.lang),
-              );
+              form.setValue("systemPrompt", defaultPromp);
             }}
           >
             Default Prompt Gir

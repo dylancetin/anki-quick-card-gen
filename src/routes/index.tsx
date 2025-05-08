@@ -7,6 +7,10 @@ import { FileUpload } from "@/components/custom-ui/file";
 import { ManagePDFDash } from "@/components/dash/pdf-manage";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
+import { Switch } from "@/components/ui/switch";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { PreviousPDF } from "@/components/dash/previous-pdfs";
+import { usePdfFileAndCurrentPage } from "@/hooks/use-current-page";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -21,7 +25,9 @@ type Tabs = "upload" | "inspect";
 
 function HomeComponent() {
   const [activeTab, setActiveTab] = useState<Tabs>("upload");
-  const [file, setFile] = useState<File | undefined>(undefined);
+  const [savePdf, setSavePdf] = useLocalStorage("save-pdf-on-upload", false);
+  const [currentPage, setCurrentPage, file, setFile] =
+    usePdfFileAndCurrentPage(savePdf);
 
   useEffect(() => {
     if (file) {
@@ -32,11 +38,17 @@ function HomeComponent() {
   return (
     <div className="p-4">
       <Tabs value={activeTab}>
-        <TabsContent value="upload" className="mt-0">
-          <h1 className="text-2xl font-semibold"></h1>
+        <TabsContent value="upload" className="mt-0 space-y-4">
+          <h1 className="text-2xl font-semibold">Hoşgeldin</h1>
           <Card>
             <CardHeader>
-              <CardTitle>Start by uploading a PDF file</CardTitle>
+              <div className="flex justify-between w-full">
+                <CardTitle>Start by uploading a PDF file</CardTitle>
+                <div className="flex items-center gap-2">
+                  Save PDF for later sessions{" "}
+                  <Switch checked={savePdf} onCheckedChange={setSavePdf} />
+                </div>
+              </div>
               <FileUpload
                 value={file}
                 valueOnChange={setFile}
@@ -50,9 +62,15 @@ function HomeComponent() {
               </a>
             </CardHeader>
           </Card>
+          <h1 className="text-2xl font-semibold">Eski PDF'ler</h1>
+          <PreviousPDF setFile={setFile} />
         </TabsContent>
         <TabsContent value="inspect">
-          <ManagePDFDash file={file} />
+          <ManagePDFDash
+            file={file}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </TabsContent>
       </Tabs>
     </div>
