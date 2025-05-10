@@ -128,7 +128,7 @@ export function GlobalSettingsStateProvider({
 }) {
   const settings = useLocalStorage<GlobalSettings>("settings", defSettings);
 
-  const promptState = useLocalStorage("system-prompt", () =>
+  const promptState = useLocalStorage<string>("system-prompt", () =>
     getDefaultSystemPrompt("TÜRKÇE"),
   );
 
