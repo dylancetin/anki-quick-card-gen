@@ -42,10 +42,6 @@ function subscribe(key: string) {
   };
 }
 
-function getServerSnapshot(): string | null {
-  throw new Error("useLocalStorage is a client-only hook");
-}
-
 export function useLocalStorage<T>(
   key: string,
   initialValue: T | (() => T),
@@ -58,11 +54,7 @@ export function useLocalStorage<T>(
   initialValue?: T | (() => T),
 ): [T | undefined, React.Dispatch<React.SetStateAction<T | undefined>>] {
   const getSnapshot = () => getLocalStorageItem(key);
-  const store = useSyncExternalStore(
-    subscribe(key),
-    getSnapshot,
-    getServerSnapshot,
-  );
+  const store = useSyncExternalStore(subscribe(key), getSnapshot);
 
   const value =
     store != null

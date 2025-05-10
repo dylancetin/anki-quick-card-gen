@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { useLiveQuery } from "@/lib/use-live-query";
+import { useLiveQuery } from "@/hooks/use-live-query";
 
 import { Button } from "@/components/ui/button";
 import { FileIcon } from "lucide-react";

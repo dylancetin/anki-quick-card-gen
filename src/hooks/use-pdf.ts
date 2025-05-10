@@ -68,7 +68,7 @@ export const useCreatePreviewImg = (
         fileName: file.name,
         fileSize: file.size,
       });
-      if (!dbPdf || !dbPdf.file) {
+      if (!dbPdf || !dbPdf.file || dbPdf.previewImage) {
         console.log("skipping img preview gen");
         return;
       }

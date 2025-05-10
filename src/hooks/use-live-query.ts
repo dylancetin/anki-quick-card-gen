@@ -1,4 +1,6 @@
+import Dexie from "dexie";
 import React from "react";
+
 export interface InteropableObservable<T> {
   subscribe(
     onNext: (x: T) => any,
@@ -135,4 +137,25 @@ export function useObservable<T, TDefault>(
 
   // Return the current result
   return monitor.current.result;
+}
+
+export function useLiveQuery<T>(
+  querier: () => Promise<T> | T,
+  deps?: any[],
+): T | undefined;
+export function useLiveQuery<T, TDefault>(
+  querier: () => Promise<T> | T,
+  deps: any[],
+  defaultResult: TDefault,
+): T | TDefault;
+export function useLiveQuery<T, TDefault>(
+  querier: () => Promise<T> | T,
+  deps?: any[],
+  defaultResult?: TDefault,
+): T | TDefault {
+  return useObservable(
+    () => Dexie.liveQuery(querier),
+    deps || [],
+    defaultResult as TDefault,
+  );
 }

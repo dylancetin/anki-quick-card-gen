@@ -10,7 +10,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { Switch } from "@/components/ui/switch";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { PreviousPDF } from "@/components/dash/previous-pdfs";
-import { usePdfFileAndCurrentPage } from "@/hooks/use-current-page";
+import { usePdfFileAndCurrentPage } from "@/hooks/use-pdf";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,

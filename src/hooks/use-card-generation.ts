@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useModel } from "./ai";
+import { useModel } from "./use-ai";
 import { usePromptState } from "@/components/global-settings";
 import { AIAnkiCardSchema, PreviewCard } from "@/lib/db";
 import { streamObject } from "ai";
