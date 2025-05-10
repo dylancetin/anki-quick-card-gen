@@ -138,20 +138,24 @@ export function ManagePDFDash({
                     const inputValue = event.currentTarget.value;
                     if (inputValue) {
                       const page = Number(inputValue); // Sayfa indeksi 0'dan başladığı için 1 çıkarıyoruz
+
                       if (page <= (numPages ?? 1)) {
                         setCurrentPage(page);
+                        return;
                       }
+
                       if (page < 0) {
                         toast.error("Sayfa bulunamadı", {
                           description: "Girilen sayfa 0'dan daha küçük olamaz.",
                           duration: 2500,
                         });
-                      } else {
-                        toast.error("Sayfa bulunamadı", {
-                          description: `Girilen sayfa mevcut sayfa sayısından (${numPages}) daha büyük olamaz.`,
-                          duration: 2500,
-                        });
+                        return;
                       }
+
+                      toast.error("Sayfa bulunamadı", {
+                        description: `Girilen sayfa mevcut sayfa sayısından (${numPages}) daha büyük olamaz.`,
+                        duration: 2500,
+                      });
                     }
                   }
                 }}

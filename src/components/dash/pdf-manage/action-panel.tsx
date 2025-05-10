@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { generateObject } from "ai";
+import { streamObject } from "ai";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useModel } from "@/hooks/ai";
 import { toast } from "sonner";
@@ -76,8 +76,9 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
       );
       try {
-        const { object } = await generateObject({
+        const { elementStream } = streamObject({
           schema: AIAnkiCardSchema,
+          output: "array",
           model,
           mode: "json",
           system: systemPrompt,
@@ -88,20 +89,30 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             currentPage,
           }),
         });
-        AIAnkiCardSchema.parse(object);
-        setPreviewCards((d) => {
-          d.push(
-            ...object.cards.map((e) => ({
-              ...e,
+
+        let count = 1;
+        for await (const card of elementStream) {
+          toast.loading(
+            `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
+            {
+              id: toastId,
+              description: `${count} kart yüklendi`,
+            },
+          );
+          setPreviewCards((d) => {
+            d.push({
+              ...card,
               page: currentPage,
               fromPage: includePagesContext
                 ? currentPage - includePagesContext
                 : undefined,
-            })),
-          );
-        });
+            });
+          });
+          ++count;
+        }
+
         toast.success(
-          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI Kartları yüklendi`,
+          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} arasında toplam ${count} kart yüklendi`,
           {
             id: toastId,
             duration: 4000,

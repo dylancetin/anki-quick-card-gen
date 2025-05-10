@@ -80,7 +80,7 @@ function RenderTooltipContent({
   );
 }
 
-const PREVIEW_PAGE_SIZE = 10;
+const PREVIEW_PAGE_SIZE = 9;
 export function PreviewModal({
   open,
   setOpen,
@@ -672,7 +672,7 @@ export function AllCards() {
     autoResetPageIndex: false,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 9,
       },
     },
   });

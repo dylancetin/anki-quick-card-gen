@@ -36,9 +36,11 @@ const ImageOcclusionCardSchema = z.object({
 });
 export type ImageOcclusionCard = z.infer<typeof ImageOcclusionCardSchema>;
 
-export const AIAnkiCardSchema = z.object({
-  cards: z.array(z.union([BasicCardSchema, ClozeCardSchema, TypeInCardSchema])),
-});
+export const AIAnkiCardSchema = z.discriminatedUnion("type", [
+  BasicCardSchema,
+  ClozeCardSchema,
+  TypeInCardSchema,
+]);
 
 export type AIAnkiCard = z.infer<typeof AIAnkiCardSchema>;
 
