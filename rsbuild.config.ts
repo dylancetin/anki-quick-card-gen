@@ -3,6 +3,7 @@ import { pluginReact } from "@rsbuild/plugin-react";
 import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 import { pluginBabel } from "@rsbuild/plugin-babel";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
+import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 
 export const ReactCompilerConfig = {
   target: "19", // '17' | '18' | '19'
@@ -26,7 +27,13 @@ export default defineConfig({
   },
   tools: {
     rspack: {
-      plugins: [TanStackRouterRspack()],
+      plugins: [
+        TanStackRouterRspack(),
+        process.env.RSDOCTOR &&
+          new RsdoctorRspackPlugin({
+            // plugin options
+          }),
+      ],
     },
   },
 });
