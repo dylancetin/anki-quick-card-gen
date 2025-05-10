@@ -4,12 +4,10 @@ import {
   type SetStateAction,
   createContext,
   useContext,
-  useEffect,
-  useState,
 } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { getDefaultSystemPrompt } from "@/lib/prompt";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export const openRouterProviders = [
   "OpenAI",
@@ -66,6 +64,7 @@ export const openRouterProviders = [
   "Lynn",
   "Reflection",
 ];
+
 export const globalSettingsSchema = z
   .object({
     selectedType: z.enum(["openai-compatible", "claude", "groq", "openrouter"]),
@@ -107,7 +106,7 @@ export const globalSettingsSchema = z
 
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
 
-const defSettings = {
+const defSettings: GlobalSettings = {
   key: "SET_YOUR_KEY_NOW",
   baseUrl: "https://api.openai.com/v1",
   model: "gpt-4o-mini",
@@ -127,50 +126,14 @@ export function GlobalSettingsStateProvider({
 }: {
   children: ReactNode;
 }) {
-  const [value, setValue] = useState<GlobalSettings>(() => {
-    const savedSettings = localStorage.getItem("settings");
+  const settings = useLocalStorage<GlobalSettings>("settings", defSettings);
 
-    if (savedSettings === null) {
-      return defSettings;
-    }
-
-    const parsedSettings = globalSettingsSchema.safeParse(
-      JSON.parse(savedSettings),
-    );
-
-    if (parsedSettings.success) {
-      return parsedSettings.data;
-    }
-
-    toast.error("Ayarlar yüklenirken bir hata oluştu");
-
-    return defSettings;
-  });
-  const promptState = useState<string>(() => {
-    const storedValue = localStorage.getItem("system-prompt");
-    if (storedValue) {
-      try {
-        return JSON.parse(storedValue)?.prompt;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return getDefaultSystemPrompt(value.lang ?? "TÜRKÇE");
-  });
-
-  useEffect(() => {
-    localStorage.setItem("settings", JSON.stringify(value));
-  }, [value]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "system-prompt",
-      JSON.stringify({ prompt: promptState[0] }),
-    );
-  }, [promptState[0]]);
+  const promptState = useLocalStorage("system-prompt", () =>
+    getDefaultSystemPrompt("TÜRKÇE"),
+  );
 
   return (
-    <GlobalSettingsStateContext.Provider value={[value, setValue]}>
+    <GlobalSettingsStateContext.Provider value={settings}>
       <PromptStateContext.Provider value={promptState}>
         {children}
       </PromptStateContext.Provider>

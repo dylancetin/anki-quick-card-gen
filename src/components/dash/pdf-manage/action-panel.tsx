@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { streamObject } from "ai";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { useModel } from "@/hooks/ai";
-import { toast } from "sonner";
-import { getPrompt } from "@/lib/prompt";
 import { Label } from "@/components/ui/label";
-import { usePromptState } from "@/components/global-settings";
-import { AIAnkiCardSchema, PreviewCard } from "@/lib/db";
-import { useMutation } from "@tanstack/react-query";
-import { useImmer } from "@/lib/use-immer";
+import { PreviewCard } from "@/lib/db";
 import { AllCards, PreviewModal } from "./preview-dashboard";
 import { PdfCanvasDialog } from "./image-card-editor";
 import { CreateCardDialog } from "./create-card-dialog";
 import { DownloadAllButton } from "./download-all-dialog";
 import { Input } from "@/components/ui/input";
+import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage";
+import { useCardGeneration } from "@/hooks/use-card-generation";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -23,35 +18,11 @@ interface ActionsPanelProps {
 }
 
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
+  const [openPreview, setOpenPreview] = useState(false);
+
   const [includePagesContext, setIncludePagesContext] = useState<number>(0);
   const [startCounting, setStartCounting] = useState(false);
   const [startCountingPage, setStartCountingPage] = useState(0);
-  const [previewCards, setPreviewCards] = useImmer<PreviewCard[]>(() => {
-    const saved = localStorage.getItem("preview-cards");
-    if (saved) {
-      try {
-        const j = JSON.parse(saved);
-        if (Array.isArray(j)) {
-          return j;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return [];
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem("preview-cards", JSON.stringify(previewCards));
-    } catch (e) {
-      toast.error("Local storeage full");
-    }
-  }, [previewCards.length]);
-
-  const [openPreview, setOpenPreview] = useState(false);
-  const model = useModel();
-  const [systemPrompt] = usePromptState();
-
   useEffect(() => {
     if (!startCounting) return;
     const diff = currentPage - startCountingPage;
@@ -60,77 +31,12 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
     }
   }, [startCounting, setIncludePagesContext, includePagesContext, currentPage]);
 
-  const cardGenMutation = useMutation({
-    mutationFn: async ({
-      currentPage,
-      includePagesContext,
-    }: {
-      currentPage: number;
-      includePagesContext: number;
-    }): Promise<void> => {
-      if (systemPrompt.length < 5) {
-        toast.error("Sistem promptunda sıkıntı var");
-        throw new Error("prompt too short");
-      }
-      const toastId = toast.loading(
-        `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
-      );
-      try {
-        const { elementStream } = streamObject({
-          schema: AIAnkiCardSchema,
-          output: "array",
-          model,
-          mode: "json",
-          system: systemPrompt,
-          maxTokens: 5000,
-          prompt: await getPrompt({
-            includePagesContext,
-            pdfDoc,
-            currentPage,
-          }),
-        });
+  const [previewCards, setPreviewCards] = useImmerLocalStorage<PreviewCard[]>(
+    "preview-cards",
+    [],
+  );
 
-        let count = 0;
-        for await (const card of elementStream) {
-          ++count;
-          toast.loading(
-            `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
-            {
-              id: toastId,
-              description: `${count} kart yüklendi`,
-            },
-          );
-          setPreviewCards((d) => {
-            d.push({
-              ...card,
-              page: currentPage,
-              fromPage: includePagesContext
-                ? currentPage - includePagesContext
-                : undefined,
-            });
-          });
-        }
-
-        toast.success(
-          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} arasında toplam ${count} kart yüklendi`,
-          {
-            id: toastId,
-            duration: 4000,
-          },
-        );
-      } catch (error) {
-        toast.error(
-          `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} kartları yüklenirken bir sorun oluştu`,
-          {
-            id: toastId,
-            duration: 4000,
-          },
-        );
-
-        console.error("Error summarizing page:", error);
-      }
-    },
-  });
+  const cardGenMutation = useCardGeneration(pdfDoc, setPreviewCards);
 
   return (
     <Card>

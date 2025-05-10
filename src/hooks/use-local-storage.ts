@@ -48,14 +48,14 @@ function getServerSnapshot(): string | null {
 
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T,
+  initialValue: T | (() => T),
 ): [T, React.Dispatch<React.SetStateAction<T>>];
 export function useLocalStorage<T>(
   key: string,
 ): [T | undefined, React.Dispatch<React.SetStateAction<T | undefined>>];
 export function useLocalStorage<T>(
   key: string,
-  initialValue?: T,
+  initialValue?: T | (() => T),
 ): [T | undefined, React.Dispatch<React.SetStateAction<T | undefined>>] {
   const getSnapshot = () => getLocalStorageItem(key);
   const store = useSyncExternalStore(
@@ -63,7 +63,15 @@ export function useLocalStorage<T>(
     getSnapshot,
     getServerSnapshot,
   );
-  const value = store != null ? (JSON.parse(store) as T) : initialValue;
+
+  const value =
+    store != null
+      ? (JSON.parse(store) as T)
+      : initialValue === undefined
+        ? undefined
+        : typeof initialValue === "function"
+          ? (initialValue as () => T)()
+          : initialValue;
 
   const setValue = React.useCallback<
     React.Dispatch<React.SetStateAction<T | undefined>>
@@ -83,7 +91,11 @@ export function useLocalStorage<T>(
   );
 
   React.useEffect(() => {
-    if (getLocalStorageItem(key) === null && initialValue !== undefined) {
+    if (
+      getLocalStorageItem(key) === null &&
+      initialValue !== undefined &&
+      typeof initialValue !== "function"
+    ) {
       setLocalStorageItem(key, initialValue);
     }
   }, [key, initialValue]);
