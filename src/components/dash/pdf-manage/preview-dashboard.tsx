@@ -48,7 +48,9 @@ import { Updater } from "use-immer";
 import { useLiveQuery } from "@/lib/use-live-query";
 import { Textarea } from "@/components/ui/textarea";
 import { DeleteAllButton } from "./delete-all-cards";
-const Markdown = lazy(() => import("@/components/markdown"));
+const Markdown = lazy(
+  /* webpackPreload: true */ () => import("@/components/markdown"),
+);
 
 function RenderTooltipContent({
   content,
@@ -678,6 +680,13 @@ export function AllCards() {
   });
   return (
     <Dialog>
+      {/* prefetch markdown */}
+      <div className="hidden" aria-hidden>
+        <Suspense fallback={""}>
+          <Markdown content={""} />
+        </Suspense>
+      </div>
+
       <DialogTrigger asChild>
         <Button className="w-full" variant={"cyan"}>
           All Cards

@@ -158,6 +158,9 @@ export const Markdown: React.FC<{ content: string }> = ({ content }) => {
     queryKey: ["markdown-html", content],
     queryFn: (e) => getHtml(e.queryKey[1]),
   });
+  if (!content) {
+    return null;
+  }
 
   if (!isSuccess) {
     return <span>loading</span>;

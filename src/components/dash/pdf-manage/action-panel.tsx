@@ -90,8 +90,9 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
           }),
         });
 
-        let count = 1;
+        let count = 0;
         for await (const card of elementStream) {
+          ++count;
           toast.loading(
             `Sayfa ${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage} AI cevabı yükleniyor`,
             {
@@ -108,7 +109,6 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 : undefined,
             });
           });
-          ++count;
         }
 
         toast.success(
