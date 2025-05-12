@@ -7,6 +7,7 @@ import { getPrompt } from "@/lib/prompt";
 import { toast } from "sonner";
 import { Updater } from "use-immer";
 import { PDFDocumentProxy } from "pdfjs-dist";
+import { useEffect } from "react";
 
 export const useCardGeneration = (
   pdfDoc: PDFDocumentProxy | null,
@@ -22,12 +23,29 @@ export const useCardGeneration = (
       currentPage: number;
       includePagesContext: number;
     }): Promise<void> => {
+      console.log({ currentPage, includePagesContext });
+      if (
+        typeof currentPage !== "number" ||
+        typeof includePagesContext !== "number" ||
+        currentPage <= includePagesContext
+      ) {
+        toast.error("Girdi type hatası!");
+        return;
+      }
+
+      const controller = new AbortController();
+      const signal = controller.signal;
       if (systemPrompt.length < 5) {
         toast.error("Sistem promptunda sıkıntı var");
         throw new Error("prompt too short");
       }
       const pagesText = `${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage}`;
-      const toastId = toast.loading(`Sayfa ${pagesText} AI cevabı yükleniyor`);
+      const toastId = toast.loading(`Sayfa ${pagesText} AI cevabı yükleniyor`, {
+        action: {
+          label: "İptal Et",
+          onClick: () => controller.abort(),
+        },
+      });
       try {
         const { elementStream } = streamObject({
           schema: AIAnkiCardSchema,
@@ -41,6 +59,7 @@ export const useCardGeneration = (
             pdfDoc,
             currentPage,
           }),
+          abortSignal: signal,
         });
 
         let count = 0;
@@ -66,6 +85,7 @@ export const useCardGeneration = (
           {
             id: toastId,
             duration: 2000,
+            action: undefined,
           },
         );
       } catch (error) {
@@ -74,6 +94,7 @@ export const useCardGeneration = (
           {
             id: toastId,
             duration: 2000,
+            action: undefined,
           },
         );
 
@@ -81,5 +102,21 @@ export const useCardGeneration = (
       }
     },
   });
+  useEffect(() => {
+    // @ts-ignore
+    globalThis.cardGen = cardGenMutation.mutate;
+    // @ts-ignore
+    globalThis.cardGenInfo = {
+      currentPage: "number",
+      includePagesContext: "number",
+    };
+    return () => {
+      // @ts-ignore
+      globalThis.cardGen = undefined;
+      // @ts-ignore
+      globalThis.cardGenInfo = undefined;
+    };
+  }, [cardGenMutation.mutate]);
+
   return cardGenMutation;
 };

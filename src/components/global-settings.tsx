@@ -118,7 +118,8 @@ export const GlobalSettingsStateContext = createContext<
 >(undefined);
 
 export const PromptStateContext = createContext<
-  [string, Dispatch<SetStateAction<string>>] | undefined
+  | [systemPrompt: string, setPrompt: Dispatch<SetStateAction<string>>]
+  | undefined
 >(undefined);
 
 export function GlobalSettingsStateProvider({
