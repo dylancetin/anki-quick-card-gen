@@ -90,10 +90,13 @@ export const useCreatePreviewImg = (
         fileSize: file.size,
       });
 
-      if (
-        !dbPdf ||
-        (!dbPdf.file && dbPdf.previewImage && dbPdf.dominantColor)
-      ) {
+      if (!dbPdf || !dbPdf.file) {
+        console.log("skipping img preview gen");
+        return;
+      }
+
+      // if any missing regenerate
+      if (dbPdf.previewImage && dbPdf.dominantColor) {
         console.log("skipping img preview gen");
         return;
       }
