@@ -39,11 +39,11 @@ Your job is simple, yet it is very important that you understand each step and p
 }
 
 export async function getPrompt({
-  includePagesContext,
+  includePagesOffset,
   currentPage,
   pdfDoc,
 }: {
-  includePagesContext: number;
+  includePagesOffset: number;
   currentPage: number;
   pdfDoc: PDFDocumentProxy | null;
 }): Promise<string | undefined> {
@@ -81,7 +81,7 @@ export async function getPrompt({
   let prompt = "";
 
   // walk backwards for as many pages as requested
-  for (let offset = includePagesContext; offset >= 1; offset--) {
+  for (let offset = includePagesOffset; offset >= 1; offset--) {
     const pageToGrab = currentPage - offset;
     if (pageToGrab < 1) continue;
     prompt += await extractPage(pageToGrab, "PAGE_CONTEXT");

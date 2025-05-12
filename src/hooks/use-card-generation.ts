@@ -18,16 +18,16 @@ export const useCardGeneration = (
   const cardGenMutation = useMutation({
     mutationFn: async ({
       currentPage,
-      includePagesContext,
+      includePagesOffset,
     }: {
       currentPage: number;
-      includePagesContext: number;
+      includePagesOffset: number;
     }): Promise<void> => {
-      console.log({ currentPage, includePagesContext });
+      console.log({ currentPage, includePagesOffset });
       if (
         typeof currentPage !== "number" ||
-        typeof includePagesContext !== "number" ||
-        currentPage <= includePagesContext
+        typeof includePagesOffset !== "number" ||
+        currentPage <= includePagesOffset
       ) {
         toast.error("Girdi type hatası!");
         return;
@@ -39,7 +39,7 @@ export const useCardGeneration = (
         toast.error("Sistem promptunda sıkıntı var");
         throw new Error("prompt too short");
       }
-      const pagesText = `${includePagesContext ? `${currentPage - includePagesContext}-` : ""}${currentPage}`;
+      const pagesText = `${includePagesOffset ? `${currentPage - includePagesOffset}-` : ""}${currentPage}`;
       const toastId = toast.loading(`Sayfa ${pagesText} AI cevabı yükleniyor`, {
         action: {
           label: "İptal Et",
@@ -55,7 +55,7 @@ export const useCardGeneration = (
           system: systemPrompt,
           maxTokens: 5000,
           prompt: await getPrompt({
-            includePagesContext,
+            includePagesOffset,
             pdfDoc,
             currentPage,
           }),
@@ -73,8 +73,8 @@ export const useCardGeneration = (
             d.push({
               ...card,
               page: currentPage,
-              fromPage: includePagesContext
-                ? currentPage - includePagesContext
+              fromPage: includePagesOffset
+                ? currentPage - includePagesOffset
                 : undefined,
             });
           });
@@ -108,7 +108,7 @@ export const useCardGeneration = (
     // @ts-ignore
     globalThis.cardGenInfo = {
       currentPage: "number",
-      includePagesContext: "number",
+      includePagesOffset: "number",
     };
     return () => {
       // @ts-ignore

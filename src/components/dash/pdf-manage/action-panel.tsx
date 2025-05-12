@@ -20,16 +20,16 @@ interface ActionsPanelProps {
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   const [openPreview, setOpenPreview] = useState(false);
 
-  const [includePagesContext, setIncludePagesContext] = useState<number>(0);
+  const [includePagesOffset, setIncludePagesOffset] = useState<number>(0);
   const [startCounting, setStartCounting] = useState(false);
   const [startCountingPage, setStartCountingPage] = useState(0);
   useEffect(() => {
     if (!startCounting) return;
     const diff = currentPage - startCountingPage;
-    if (includePagesContext !== diff) {
-      setIncludePagesContext(diff);
+    if (includePagesOffset !== diff) {
+      setIncludePagesOffset(diff);
     }
-  }, [startCounting, setIncludePagesContext, includePagesContext, currentPage]);
+  }, [startCounting, setIncludePagesOffset, includePagesOffset, currentPage]);
 
   const [previewCards, setPreviewCards] = useImmerLocalStorage<PreviewCard[]>(
     "preview-cards",
@@ -60,9 +60,9 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 <Input
                   type="number"
                   min={1}
-                  value={includePagesContext}
+                  value={includePagesOffset}
                   onChange={(e) =>
-                    setIncludePagesContext(Number.parseInt(e.target.value) || 0)
+                    setIncludePagesOffset(Number.parseInt(e.target.value) || 0)
                   }
                   className="w-20"
                 />
@@ -70,7 +70,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setIncludePagesContext(0);
+                    setIncludePagesOffset(0);
                   }}
                 >
                   Reset
@@ -96,11 +96,11 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 onClick={() => {
                   cardGenMutation.mutate({
                     currentPage,
-                    includePagesContext,
+                    includePagesOffset,
                   });
                   setStartCounting(false);
                   setStartCountingPage(0);
-                  setIncludePagesContext(0);
+                  setIncludePagesOffset(0);
                 }}
               >
                 Create Cards from Current Page
