@@ -128,6 +128,7 @@ export const useCreatePreviewImg = (
       }
 
       console.log("saving preview image", imgBlob);
+      canvas.remove();
       await db.pdfs.update(dbPdf.id, {
         previewImage: imgBlob,
         dominantColor: rgb,
