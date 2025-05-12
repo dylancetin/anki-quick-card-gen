@@ -45,7 +45,7 @@ export function PreviousPdfCard({ pdf, onSelect }: PreviousPdfCardProps) {
   );
 
   return (
-    <div className="relative border rounded-xl overflow-hidden h-96 w-full flex justify-end flex-col aspect-[3/4]">
+    <div className="relative border rounded-xl overflow-hidden h-full w-full flex justify-end flex-col aspect-[3/4]">
       {previewUrl ? (
         <img
           src={previewUrl || "/placeholder.svg"}
