@@ -4,7 +4,7 @@ import "katex/dist/katex.min.css";
 
 // optional HLJS CSS
 import "highlight.js/styles/default.css";
-import React, { use } from "react";
+import React from "react";
 import {
   marked,
   RendererExtensionFunction,
@@ -95,11 +95,12 @@ interface ClozeToken {
   text: string;
 }
 
-const getHtml = async (content: string) => {
+const getHtml = (content: string) => {
   const options = {
     gfm: true,
     breaks: true,
     smartypants: true, // TS will complain unless we cast
+    async: false,
     highlight: (code: string, lang: string | undefined): string => {
       if (lang && hljs.getLanguage(lang)) {
         try {
@@ -148,9 +149,8 @@ const getHtml = async (content: string) => {
     ],
   });
 
-  // 6) Parse async and update state only with a string
-  const renderPromise = marked.parse(content || "", { async: true });
-  return await renderPromise;
+  // 6) Parse and update state only with a string
+  return marked.parse(content || "", { async: false });
 };
 
 export const Markdown: React.FC<{ content: string }> = ({ content }) => {

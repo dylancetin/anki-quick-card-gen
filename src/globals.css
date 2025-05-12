@@ -460,12 +460,3 @@
 .cloze:hover {
 	background-color: #ffa500;
 }
-
-.card-overlay-gradient {
-	background-image: linear-gradient(
-		to top,
-		#4385be,
-		cubic-bezier(0.38, 0, 0.63, 0.57),
-		#92bfdb00
-	);
-}

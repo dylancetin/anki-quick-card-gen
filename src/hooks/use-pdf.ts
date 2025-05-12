@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/db";
 import { PDFDocumentProxy } from "pdfjs-dist";
+import { Vibrant } from "node-vibrant/browser";
 
 export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
   const [currentPage, setCurrentPage] = useState<undefined | number>();
@@ -49,6 +50,26 @@ export const usePdfFileAndCurrentPage = (savePdf: boolean) => {
   return [currentPage ?? 1, setCurrentPage, file, setFile] as const;
 };
 
+/**
+ * Returns a hex string of the image's most “Vibrant” swatch,
+ * falling back to another swatch if needed.
+ */
+export async function getDominantColorViaVibrant(
+  imgUrl: string,
+): Promise<[number, number, number]> {
+  const palette = await Vibrant.from(imgUrl).getPalette();
+  console.log(palette);
+  //type Vec3 = [number, number, number]
+
+  const v = palette.DarkVibrant;
+  console.log("Generated preview img bg color:", v?.rgb);
+  if (!v) {
+    console.error("A problem occured on rgb gen", v);
+  }
+
+  return v?.rgb ?? [108, 28, 124];
+}
+
 export const useCreatePreviewImg = (
   pdfDoc: PDFDocumentProxy | null,
   file: File | undefined,
@@ -68,7 +89,11 @@ export const useCreatePreviewImg = (
         fileName: file.name,
         fileSize: file.size,
       });
-      if (!dbPdf || !dbPdf.file || dbPdf.previewImage) {
+
+      if (
+        !dbPdf ||
+        (!dbPdf.file && dbPdf.previewImage && dbPdf.dominantColor)
+      ) {
         console.log("skipping img preview gen");
         return;
       }
@@ -90,8 +115,20 @@ export const useCreatePreviewImg = (
           resolve(blob!);
         }, "image/webp");
       });
+
+      const url = URL.createObjectURL(imgBlob);
+      let rgb: [number, number, number];
+      try {
+        rgb = await getDominantColorViaVibrant(url);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+
       console.log("saving preview image", imgBlob);
-      await db.pdfs.update(dbPdf.id, { previewImage: imgBlob });
+      await db.pdfs.update(dbPdf.id, {
+        previewImage: imgBlob,
+        dominantColor: rgb,
+      });
     };
     createPreviewBlob();
   }, [pdfDoc, file, startedRunningForPdf.current]);

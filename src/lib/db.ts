@@ -91,13 +91,14 @@ const db = new Dexie("Local-Fake-AnkiDB") as Dexie & {
       previewImage?: Blob;
       sessionRestorePageIndex?: number;
       lastUsed: number;
+      dominantColor?: [number, number, number];
     },
     "id"
   >;
 };
 
 // Schema declaration:
-db.version(4).stores({
+db.version(5).stores({
   cards: "++id", // primary key "id" (for the runtime!)
   images: "id",
   pdfs: "++id, [fileName+fileSize]",
