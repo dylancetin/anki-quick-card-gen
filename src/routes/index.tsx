@@ -39,29 +39,30 @@ function HomeComponent() {
     <div className="p-4">
       <Tabs value={activeTab}>
         <TabsContent value="upload" className="mt-0 space-y-4">
-          <h1 className="text-2xl font-semibold">Hoşgeldin</h1>
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between w-full">
-                <CardTitle>Start by uploading a PDF file</CardTitle>
-                <div className="flex items-center gap-2">
-                  Save PDF for later sessions{" "}
-                  <Switch checked={savePdf} onCheckedChange={setSavePdf} />
+          <div className="mx-auto max-w-200 space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between w-full">
+                  <CardTitle>Yeni PDF Ekle</CardTitle>
+                  <div className="flex items-center gap-2">
+                    Save PDF for later sessions{" "}
+                    <Switch checked={savePdf} onCheckedChange={setSavePdf} />
+                  </div>
                 </div>
-              </div>
-              <FileUpload
-                value={file}
-                valueOnChange={setFile}
-                accept="application/pdf"
-              />
-              <a
-                href="https://taylan.co"
-                className="text-foreground/70 pt-4 w-fit"
-              >
-                {"Taylan ™"}
-              </a>
-            </CardHeader>
-          </Card>
+                <FileUpload
+                  value={file}
+                  valueOnChange={setFile}
+                  accept="application/pdf"
+                />
+                <a
+                  href="https://taylan.co"
+                  className="text-foreground/70 pt-4 w-fit"
+                >
+                  {"Taylan ™"}
+                </a>
+              </CardHeader>
+            </Card>
+          </div>
           <h1 className="text-2xl font-semibold">Eski PDF'ler</h1>
           <PreviousPDF setFile={setFile} />
         </TabsContent>

@@ -45,7 +45,7 @@ export function PreviousPdfCard({ pdf, onSelect }: PreviousPdfCardProps) {
   );
 
   return (
-    <div className="relative border rounded-xl overflow-hidden min-h-96 flex justify-end flex-col">
+    <div className="relative border rounded-xl overflow-hidden h-96 w-full flex justify-end flex-col aspect-[3/4]">
       {previewUrl ? (
         <img
           src={previewUrl || "/placeholder.svg"}
@@ -94,6 +94,7 @@ export function PreviousPdfCard({ pdf, onSelect }: PreviousPdfCardProps) {
   );
 }
 
+const MAX_PDF_LENGTH = 8;
 export function PreviousPDF({
   setFile,
 }: {
@@ -101,7 +102,7 @@ export function PreviousPDF({
 }) {
   const oldPdfs = useLiveQuery(() =>
     db.pdfs
-      .limit(6)
+      .limit(MAX_PDF_LENGTH)
       .filter((f) => !!f.file)
       .reverse()
       .sortBy("lastUsed"),
@@ -116,17 +117,19 @@ export function PreviousPDF({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      {oldPdfs.length > 4 ? (
+    <>
+      {oldPdfs.length > MAX_PDF_LENGTH ? (
         <p>
-          6'dan fazla pdf'i sistemde kayıtlı bırakmamanızı öneririz. PDF'ler
-          kullandığınız browser üzerinde saklanmaktadır.
+          {MAX_PDF_LENGTH}'dan fazla pdf'i sistemde kayıtlı bırakmamanızı
+          öneririz. PDF'ler kullandığınız browser üzerinde saklanmaktadır.
         </p>
       ) : null}
-      {oldPdfs.map((pdf) => (
-        <PreviousPdfCard key={pdf.id} pdf={pdf} onSelect={onSelect} />
-      ))}
-    </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {oldPdfs.map((pdf) => (
+          <PreviousPdfCard key={pdf.id} pdf={pdf} onSelect={onSelect} />
+        ))}
+      </div>
+    </>
   );
 }
 
