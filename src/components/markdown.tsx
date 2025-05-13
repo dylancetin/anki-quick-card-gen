@@ -4,7 +4,7 @@ import "katex/dist/katex.min.css";
 
 // optional HLJS CSS
 import "highlight.js/styles/default.css";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   marked,
   RendererExtensionFunction,
@@ -13,7 +13,7 @@ import {
 } from "marked";
 import hljs from "highlight.js";
 import katex from "katex";
-import { useQuery } from "@tanstack/react-query";
+import { ErrorBoundary } from "./custom-ui/error-boundary";
 
 const inlineRuleNonStandard =
   /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1/; // Non-standard, even if there are no spaces before and after $ or $$, try to parse
@@ -153,21 +153,28 @@ const getHtml = (content: string) => {
   return marked.parse(content || "", { async: false });
 };
 
-export const Markdown: React.FC<{ content: string }> = ({ content }) => {
-  const { data: html, isSuccess } = useQuery({
-    queryKey: ["markdown-html", content],
-    queryFn: (e) => getHtml(e.queryKey[1]),
-  });
-  if (!content) {
-    return null;
-  }
-
-  if (!isSuccess) {
-    return <span>loading</span>;
-  }
+export const MarkdownWrapper: React.FC<{ content: string }> = ({ content }) => {
+  const html = useMemo<string>(() => getHtml(content), [content]);
 
   return (
     <div className="markdown-body" dangerouslySetInnerHTML={{ __html: html }} />
+  );
+};
+
+export const Markdown: React.FC<{ content: string }> = ({ content }) => {
+  return (
+    <ErrorBoundary
+      fallback={(e) => {
+        console.log(e);
+        return (
+          <div>
+            An Error occured please inspect console, or delete this card please
+          </div>
+        );
+      }}
+    >
+      <MarkdownWrapper content={content} />
+    </ErrorBoundary>
   );
 };
 

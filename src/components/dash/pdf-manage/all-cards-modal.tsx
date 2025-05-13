@@ -71,120 +71,6 @@ export function AllCards() {
     [setEditDialogOpen, setEditFocusField, setEditingRow],
   );
 
-  const EditCardComponent = () => {
-    const [frontContent, setFrontContent] = useState(
-      // @ts-ignore
-      editingRow?.value.front || "",
-    );
-    const [backContent, setBackContent] = useState(
-      // @ts-ignore
-      editingRow?.value.back || "",
-    );
-
-    const frontRef = useRef<HTMLTextAreaElement>(null);
-    const backRef = useRef<HTMLTextAreaElement>(null);
-
-    // Reset content when dialog opens or card changes
-    useEffect(() => {
-      if (editDialogOpen) {
-        if (!editingRow) {
-          return;
-        }
-        if (editingRow.value.type === "Image Occlusion") {
-          return;
-        }
-
-        setFrontContent(editingRow.value.front || "");
-        if (editingRow.value.type !== "Cloze")
-          setBackContent(editingRow.value.back || "");
-      }
-    }, [editDialogOpen, editingRow, setFrontContent, setBackContent]);
-
-    // Focus the appropriate field when the dialog opens
-    useEffect(() => {
-      setTimeout(() => {
-        if (editDialogOpen && editFocusField) {
-          if (editFocusField === "front" && frontRef.current) {
-            frontRef.current.focus();
-            frontRef.current.setSelectionRange(
-              0,
-              frontRef.current.value.length,
-            );
-          } else if (editFocusField === "back" && backRef.current) {
-            backRef.current.focus();
-            backRef.current.setSelectionRange(0, backRef.current.value.length);
-          }
-        }
-      }, 10);
-    }, [editDialogOpen, editFocusField, frontRef.current, backRef.current]);
-
-    const handleSave = async () => {
-      if (!editingRow || editingRow.value.type === "Image Occlusion") {
-        return;
-      }
-      await db.cards.update(editingRow.id, {
-        ...(editingRow.value.type !== "Cloze"
-          ? { "value.back": backContent }
-          : undefined),
-        // @ts-ignore
-        "value.front": frontContent,
-      });
-      setEditDialogOpen(false);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-    return (
-      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <AlertDialogContent className="max-w-[500px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Kartı Düzenle</AlertDialogTitle>
-            <AlertDialogDescription>
-              Kartın içeriğini düzenleyip kaydedebilirsiniz.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 my-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Ön-Yüz</label>
-              <Textarea
-                ref={frontRef}
-                value={frontContent}
-                onChange={(e) => setFrontContent(e.target.value)}
-                placeholder="Ön-Yüz metni"
-                rows={4}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            {(editingRow?.value.type === "Basic" ||
-              editingRow?.value.type === "Type-in") && (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium">Arka-Yüz</label>
-                <Textarea
-                  ref={backRef}
-                  value={backContent}
-                  onChange={(e) => setBackContent(e.target.value)}
-                  placeholder="Arka-Yüz metni"
-                  rows={4}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-            )}
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>İptal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSave}>
-              Düzenlemeyi Kaydet
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  };
-
   const allCardsColumns: ColumnDef<AnkiCard>[] = useMemo(
     () => [
       {
@@ -305,7 +191,7 @@ export function AllCards() {
           All Cards
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
+      <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] min-h-[calc(100vh-32px)] overflow-y-scroll block space-y-4">
         <DialogHeader className="flex justify-between w-full flex-row pr-8 pt-8">
           <div className="space-y-4">
             <DialogTitle>All cards on the depot</DialogTitle>
@@ -324,7 +210,12 @@ export function AllCards() {
           className="rounded-md border max-w-full overflow-x-scroll min-h-[528px]"
         />
         <TableNav table={table} />
-        <EditCardComponent />
+        <EditCardComponent
+          editDialogOpen={editDialogOpen}
+          editingRow={editingRow}
+          editFocusField={editFocusField}
+          setEditDialogOpen={setEditDialogOpen}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -378,5 +269,127 @@ export const ImageOcclusionPreview = ({
         </div>
       </TooltipContent>
     </Tooltip>
+  );
+};
+
+const EditCardComponent = ({
+  editDialogOpen,
+  editingRow,
+  editFocusField,
+  setEditDialogOpen,
+}: {
+  editDialogOpen: boolean;
+  editingRow: AnkiCard | null;
+  editFocusField: "front" | "back" | null;
+  setEditDialogOpen: React.Dispatch<boolean>;
+}) => {
+  "use no memo";
+  const [frontContent, setFrontContent] = useState(
+    // @ts-ignore
+    editingRow?.value.front || "",
+  );
+  const [backContent, setBackContent] = useState(
+    // @ts-ignore
+    editingRow?.value.back || "",
+  );
+
+  const frontRef = useRef<HTMLTextAreaElement>(null);
+  const backRef = useRef<HTMLTextAreaElement>(null);
+
+  // Reset content when dialog opens or card changes
+  useEffect(() => {
+    if (editDialogOpen) {
+      if (!editingRow) {
+        return;
+      }
+      if (editingRow.value.type === "Image Occlusion") {
+        return;
+      }
+
+      setFrontContent(editingRow.value.front || "");
+      if (editingRow.value.type !== "Cloze")
+        setBackContent(editingRow.value.back || "");
+    }
+  }, [editDialogOpen, editingRow, setFrontContent, setBackContent]);
+
+  // Focus the appropriate field when the dialog opens
+  useEffect(() => {
+    setTimeout(() => {
+      if (editDialogOpen && editFocusField) {
+        if (editFocusField === "front" && frontRef.current) {
+          frontRef.current.focus();
+          frontRef.current.setSelectionRange(0, frontRef.current.value.length);
+        } else if (editFocusField === "back" && backRef.current) {
+          backRef.current.focus();
+          backRef.current.setSelectionRange(0, backRef.current.value.length);
+        }
+      }
+    }, 10);
+  }, [editDialogOpen, editFocusField, frontRef, backRef]);
+
+  const handleSave = async () => {
+    if (!editingRow || editingRow.value.type === "Image Occlusion") {
+      return;
+    }
+    await db.cards.update(editingRow.id, {
+      ...(editingRow.value.type !== "Cloze"
+        ? { "value.back": backContent }
+        : undefined),
+      // @ts-ignore
+      "value.front": frontContent,
+    });
+    setEditDialogOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    }
+  };
+  return (
+    <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      <AlertDialogContent className="max-w-[500px]">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Kartı Düzenle</AlertDialogTitle>
+          <AlertDialogDescription>
+            Kartın içeriğini düzenleyip kaydedebilirsiniz.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="space-y-4 my-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Ön-Yüz</label>
+            <Textarea
+              ref={frontRef}
+              value={frontContent}
+              onChange={(e) => setFrontContent(e.target.value)}
+              placeholder="Ön-Yüz metni"
+              rows={4}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+          {(editingRow?.value.type === "Basic" ||
+            editingRow?.value.type === "Type-in") && (
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Arka-Yüz</label>
+              <Textarea
+                ref={backRef}
+                value={backContent}
+                onChange={(e) => setBackContent(e.target.value)}
+                placeholder="Arka-Yüz metni"
+                rows={4}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+          )}
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>İptal</AlertDialogCancel>
+          <AlertDialogAction onClick={handleSave}>
+            Düzenlemeyi Kaydet
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };

@@ -1,3 +1,4 @@
+/// <reference types="@rsbuild/core/types" />
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
@@ -21,6 +22,7 @@ export default defineConfig({
   ],
   source: {
     entry: { index: "./src/main.tsx" },
+    assetsInclude: /\.md$/,
   },
   html: {
     template: "./index.html",

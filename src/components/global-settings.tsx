@@ -135,14 +135,6 @@ export function GlobalSettingsStateProvider({
     getDefaultSystemPrompt("TÜRKÇE"),
   );
 
-  useEffect(() => {
-    if (promptState[0] !== getDefaultSystemPrompt("TÜRKÇE")) {
-      toast.info(
-        "There is a new default system prompt if you like you can change to it in the options!",
-      );
-    }
-  }, []);
-
   return (
     <GlobalSettingsStateContext.Provider value={settings}>
       <PromptStateContext.Provider value={promptState}>
