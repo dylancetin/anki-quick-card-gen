@@ -1,3 +1,4 @@
+"use no memo";
 import { db, PreviewCard } from "@/lib/db";
 import {
   useRef,
@@ -52,29 +53,21 @@ export function PreviewModal({
   previewCards: PreviewCard[];
   setPreviewCards: Updater<PreviewCard[]>;
 }) {
-  "use no memo";
   // State for the edit dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
-  const [editFocusField, setEditFocusField] = useState<"front" | "back" | null>(
-    null,
-  );
 
-  const handleCellDoubleClick = useCallback(
-    (rowIndex: number, field: "front" | "back") => {
+  const inspectRow = useCallback(
+    (rowIndex: number) => {
       setEditingRowIndex(rowIndex);
-      setEditFocusField(field);
       setEditDialogOpen(true);
     },
-    [setEditingRowIndex, setEditFocusField, setEditDialogOpen],
+    [setEditingRowIndex, setEditDialogOpen],
   );
 
   const columns = useColumns({
     setPreviewCards,
-    setEditingRowIndex,
-    setEditFocusField,
-    setEditDialogOpen,
-    handleCellDoubleClick,
+    inspectRow,
   });
 
   const table = useReactTable({
@@ -119,14 +112,15 @@ export function PreviewModal({
         </DialogHeader>
         <Datatable isLoading={false} table={table} columns={columns} />
         <TableNav table={table} />
-        <EditCardComponent
-          editDialogOpen={editDialogOpen}
-          setEditDialogOpen={setEditDialogOpen}
-          editingRowIndex={editingRowIndex}
-          editFocusField={editFocusField}
-          previewCards={previewCards}
-          setPreviewCards={setPreviewCards}
-        />
+        {editDialogOpen ? (
+          <EditCardComponent
+            editDialogOpen={editDialogOpen}
+            setEditDialogOpen={setEditDialogOpen}
+            editingRowIndex={editingRowIndex}
+            previewCards={previewCards}
+            setPreviewCards={setPreviewCards}
+          />
+        ) : undefined}
       </DialogContent>
     </Dialog>
   );
@@ -136,23 +130,16 @@ function EditCardComponent({
   editDialogOpen,
   setEditDialogOpen,
   editingRowIndex,
-  editFocusField,
   previewCards,
   setPreviewCards,
 }: {
   editDialogOpen: boolean;
   setEditDialogOpen: Dispatch<SetStateAction<boolean>>;
   editingRowIndex: number | null;
-  editFocusField: "front" | "back" | null;
   previewCards: PreviewCard[];
   setPreviewCards: Updater<PreviewCard[]>;
 }) {
-  "use no memo";
-  if (editingRowIndex === null || editingRowIndex >= previewCards.length) {
-    return null;
-  }
-
-  const card = previewCards[editingRowIndex];
+  const card = previewCards?.[editingRowIndex ?? 0];
   const [frontContent, setFrontContent] = useState(card.front || "");
   const [backContent, setBackContent] = useState(
     // @ts-ignore
@@ -168,22 +155,13 @@ function EditCardComponent({
       setFrontContent(card.front || "");
       if (card.type !== "Cloze") setBackContent(card.back || "");
     }
-  }, [editDialogOpen, card]);
+  }, [editDialogOpen, card, editingRowIndex]);
 
-  // Focus the appropriate field when the dialog opens
-  useEffect(() => {
-    if (editDialogOpen && editFocusField) {
-      if (editFocusField === "front" && frontRef.current) {
-        frontRef.current.focus();
-        frontRef.current.setSelectionRange(0, frontRef.current.value.length);
-      } else if (editFocusField === "back" && backRef.current) {
-        backRef.current.focus();
-        backRef.current.setSelectionRange(0, backRef.current.value.length);
-      }
+  // turning this to useCallback breaks idk why
+  const handleSave = () => {
+    if (editingRowIndex === null || editingRowIndex >= previewCards.length) {
+      return null;
     }
-  }, [editDialogOpen, editFocusField, frontRef.current, backRef.current]);
-
-  const handleSave = useCallback(() => {
     setPreviewCards((cards) => {
       if (card.type === "Basic" || card.type === "Type-in") {
         cards[editingRowIndex] = {
@@ -202,17 +180,18 @@ function EditCardComponent({
       }
     });
     setEditDialogOpen(false);
-  }, [editingRowIndex, setEditDialogOpen, setPreviewCards]);
+  };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSave();
-      }
-    },
-    [handleSave],
-  );
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    }
+  };
+
+  if (editingRowIndex === null || editingRowIndex >= previewCards.length) {
+    return null;
+  }
 
   return (
     <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -269,16 +248,10 @@ const saveToDB = (card: PreviewCard) => {
 
 function useColumns({
   setPreviewCards,
-  setEditingRowIndex,
-  setEditFocusField,
-  setEditDialogOpen,
-  handleCellDoubleClick,
+  inspectRow,
 }: {
   setPreviewCards: Updater<PreviewCard[]>;
-  setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
-  setEditFocusField: Dispatch<SetStateAction<"front" | "back" | null>>;
-  setEditDialogOpen: Dispatch<SetStateAction<boolean>>;
-  handleCellDoubleClick: (rowIndex: number, field: "front" | "back") => void;
+  inspectRow: (rowIndex: number) => void;
 }) {
   const columns = useMemo<ColumnDef<PreviewCard>[]>(
     () => [
@@ -309,7 +282,7 @@ function useColumns({
             return (
               <RenderMdWithTooltip
                 content={row.original.front}
-                onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
+                onDoubleClick={() => inspectRow(row.index)}
                 doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
               />
             );
@@ -319,7 +292,7 @@ function useColumns({
             return (
               <RenderMdWithTooltip
                 content={row.original.front}
-                onDoubleClick={() => handleCellDoubleClick(row.index, "front")}
+                onDoubleClick={() => inspectRow(row.index)}
                 doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
               />
             );
@@ -339,7 +312,7 @@ function useColumns({
                 row.original.type === "Basic" ||
                 row.original.type === "Type-in"
               ) {
-                handleCellDoubleClick(row.index, "back");
+                inspectRow(row.index);
               }
             }}
             doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
@@ -354,9 +327,7 @@ function useColumns({
               <Button
                 size="sm"
                 onClick={() => {
-                  setEditingRowIndex(row.index);
-                  setEditFocusField(null);
-                  setEditDialogOpen(true);
+                  inspectRow(row.index);
                 }}
               >
                 Düzenle
@@ -389,7 +360,7 @@ function useColumns({
         },
       },
     ],
-    [setPreviewCards],
+    [setPreviewCards, inspectRow],
   );
 
   return columns;

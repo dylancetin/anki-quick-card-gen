@@ -102,15 +102,20 @@ export function AllCards() {
 
     // Focus the appropriate field when the dialog opens
     useEffect(() => {
-      if (editDialogOpen && editFocusField) {
-        if (editFocusField === "front" && frontRef.current) {
-          frontRef.current.focus();
-          frontRef.current.setSelectionRange(0, frontRef.current.value.length);
-        } else if (editFocusField === "back" && backRef.current) {
-          backRef.current.focus();
-          backRef.current.setSelectionRange(0, backRef.current.value.length);
+      setTimeout(() => {
+        if (editDialogOpen && editFocusField) {
+          if (editFocusField === "front" && frontRef.current) {
+            frontRef.current.focus();
+            frontRef.current.setSelectionRange(
+              0,
+              frontRef.current.value.length,
+            );
+          } else if (editFocusField === "back" && backRef.current) {
+            backRef.current.focus();
+            backRef.current.setSelectionRange(0, backRef.current.value.length);
+          }
         }
-      }
+      }, 10);
     }, [editDialogOpen, editFocusField, frontRef.current, backRef.current]);
 
     const handleSave = async () => {
