@@ -32,9 +32,10 @@ Your job is simple, yet it is very important that you understand each step and p
 				"back": "Granum"
 			}
 4. SELECT ONLY one of these card types per card. Answer in a array of objects with the type provided.
-5. You can use $ for inline, $$ + new line for Latec. You can use valid math and katex/mhchem (for organic chemistry) syntax.
+5. You will always use $ for inline, $$ + new line for Latex. You need to use valid math and katex/mhchem (for organic chemistry) syntax.
 5. ONLY ANSWER IN THE LANGUAGE OF **${lang}** in the contents of the card
 6. Prefer making shorter key words or small sentences as answers 
+7. If a special user request exists, follow it don't create more than the request
 </SYSTEM>`;
 }
 
@@ -42,10 +43,12 @@ export async function getPrompt({
   includePagesOffset,
   currentPage,
   pdfDoc,
+  userRequest,
 }: {
   includePagesOffset: number;
   currentPage: number;
   pdfDoc: PDFDocumentProxy | null;
+  userRequest?: string;
 }): Promise<string | undefined> {
   if (!pdfDoc) {
     toast.error("PDF document could not be loaded — please refresh the page.");
@@ -89,6 +92,12 @@ export async function getPrompt({
 
   // finally, add the actual current page
   prompt += await extractPage(currentPage, "PAGE_CONTENT");
+
+  if (userRequest) {
+    const userRequestPrompt =
+      "\n" + "<USER_REQUEST>" + userRequest + "</USER_REQUEST>";
+    prompt += userRequestPrompt;
+  }
 
   return prompt;
 }

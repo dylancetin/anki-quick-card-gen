@@ -52,7 +52,7 @@ export function CreateCardDialog() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button>Create a Card</Button>
+        <Button variant={"outline"}>Create a Card</Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-[500px]">
         <AlertDialogHeader>

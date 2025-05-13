@@ -11,6 +11,7 @@ import { DownloadAllButton } from "./download-all-dialog";
 import { Input } from "@/components/ui/input";
 import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage";
 import { useCardGeneration } from "@/hooks/use-card-generation";
+import { RequestCardsDialog } from "./user-request-card-gen-dialog";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -36,7 +37,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
     [],
   );
 
-  const cardGenMutation = useCardGeneration(pdfDoc, setPreviewCards);
+  const cardGenMutation = useCardGeneration({ pdfDoc, setPreviewCards });
 
   return (
     <Card>
@@ -106,6 +107,11 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
                 Create Cards from Current Page
               </Button>
               <CreateCardDialog />
+              <RequestCardsDialog
+                cardGenMutation={cardGenMutation}
+                currentPage={currentPage}
+                includePagesOffset={includePagesOffset}
+              />
             </div>
           </CardContent>
         </Card>

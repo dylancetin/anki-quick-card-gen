@@ -4,10 +4,12 @@ import {
   type SetStateAction,
   createContext,
   useContext,
+  useEffect,
 } from "react";
 import { z } from "zod";
 import { getDefaultSystemPrompt } from "@/lib/prompt";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { toast } from "sonner";
 
 export const openRouterProviders = [
   "OpenAI",
@@ -132,6 +134,14 @@ export function GlobalSettingsStateProvider({
   const promptState = useLocalStorage<string>("system-prompt", () =>
     getDefaultSystemPrompt("TÜRKÇE"),
   );
+
+  useEffect(() => {
+    if (promptState[0] !== getDefaultSystemPrompt("TÜRKÇE")) {
+      toast.info(
+        "There is a new default system prompt if you like you can change to it in the options!",
+      );
+    }
+  }, []);
 
   return (
     <GlobalSettingsStateContext.Provider value={settings}>

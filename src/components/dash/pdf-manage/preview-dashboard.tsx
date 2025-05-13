@@ -52,6 +52,9 @@ const Markdown = lazy(
   /* webpackPreload: true */ () => import("@/components/markdown"),
 );
 
+const ALL_CARDS_PAGE_SIZE = 8;
+const PREVIEW_PAGE_SIZE = 8;
+
 function RenderTooltipContent({
   content,
   onDoubleClick,
@@ -82,7 +85,6 @@ function RenderTooltipContent({
   );
 }
 
-const PREVIEW_PAGE_SIZE = 9;
 export function PreviewModal({
   open,
   setOpen,
@@ -95,12 +97,12 @@ export function PreviewModal({
   setPreviewCards: Updater<PreviewCard[]>;
 }) {
   "use no memo";
-  function saveToDB(card: PreviewCard) {
+  const saveToDB = useCallback((card: PreviewCard) => {
     const { page: _, ...value } = card;
     db.cards.add({
       value,
     });
-  }
+  }, []);
 
   // State for the edit dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -287,7 +289,7 @@ export function PreviewModal({
       }
     }, [editDialogOpen, editFocusField]);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
       setPreviewCards((cards) => {
         if (card.type === "Basic" || card.type === "Type-in") {
           cards[editingRowIndex] = {
@@ -306,14 +308,15 @@ export function PreviewModal({
         }
       });
       setEditDialogOpen(false);
-    };
+    }, [setEditDialogOpen, setPreviewCards]);
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleSave();
       }
-    };
+    }, []);
+
     return (
       <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <AlertDialogContent className="max-w-[500px]">
@@ -367,7 +370,9 @@ export function PreviewModal({
           <div className="space-y-4">
             <DialogTitle>Kartları incele ve depoya ekle</DialogTitle>
             <DialogDescription>
-              Kartları burdan onaylayıp kaydet
+              Kartları burdan onaylayıp kaydet. Latex ve bilimsel notasyon
+              içerenler satır içeriğinde doğru gözükmeyebilir. Mouse ile
+              hoverladığında doğrusunu görebilirsin.
             </DialogDescription>
           </div>
           <Button
@@ -674,7 +679,7 @@ export function AllCards() {
     autoResetPageIndex: false,
     initialState: {
       pagination: {
-        pageSize: 9,
+        pageSize: ALL_CARDS_PAGE_SIZE,
       },
     },
   });
@@ -697,7 +702,9 @@ export function AllCards() {
           <div className="space-y-4">
             <DialogTitle>All cards on the depot</DialogTitle>
             <DialogDescription>
-              All the cards currently available to be downloaded.
+              All the cards currently available to be downloaded. Latex ve
+              bilimsel notasyon içerenler satır içeriğinde doğru gözükmeyebilir.
+              Mouse ile hoverladığında doğrusunu görebilirsin.
             </DialogDescription>
           </div>
           <DeleteAllButton />

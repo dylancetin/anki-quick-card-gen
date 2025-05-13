@@ -9,19 +9,24 @@ import { Updater } from "use-immer";
 import { PDFDocumentProxy } from "pdfjs-dist";
 import { useEffect } from "react";
 
-export const useCardGeneration = (
-  pdfDoc: PDFDocumentProxy | null,
-  setPreviewCards: Updater<PreviewCard[]>,
-) => {
+export const useCardGeneration = ({
+  pdfDoc,
+  setPreviewCards,
+}: {
+  pdfDoc: PDFDocumentProxy | null;
+  setPreviewCards: Updater<PreviewCard[]>;
+}) => {
   const model = useModel();
   const [systemPrompt] = usePromptState();
   const cardGenMutation = useMutation({
     mutationFn: async ({
       currentPage,
       includePagesOffset,
+      userRequest,
     }: {
       currentPage: number;
       includePagesOffset: number;
+      userRequest?: string;
     }): Promise<void> => {
       console.log({ currentPage, includePagesOffset });
       if (
@@ -58,6 +63,7 @@ export const useCardGeneration = (
             includePagesOffset,
             pdfDoc,
             currentPage,
+            userRequest,
           }),
           abortSignal: signal,
         });
@@ -120,3 +126,5 @@ export const useCardGeneration = (
 
   return cardGenMutation;
 };
+
+export type UseCardGenerationReturn = ReturnType<typeof useCardGeneration>;
