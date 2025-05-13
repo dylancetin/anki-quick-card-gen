@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { Label } from "@/components/ui/label";
 import { PreviewCard } from "@/lib/db";
-import { AllCards, PreviewModal } from "./preview-dashboard";
+import { PreviewModal } from "./preview-cards-modal";
 import { PdfCanvasDialog } from "./image-card-editor";
 import { CreateCardDialog } from "./create-card-dialog";
 import { DownloadAllButton } from "./download-all-dialog";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage";
 import { useCardGeneration } from "@/hooks/use-card-generation";
 import { RequestCardsDialog } from "./user-request-card-gen-dialog";
+import { AllCards } from "./all-cards-modal";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
