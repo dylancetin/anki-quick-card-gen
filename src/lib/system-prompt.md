@@ -37,6 +37,9 @@ Your job is simple, yet it is very important that you understand each step and p
    - Chemistry (using \ce): $ \ce{H2O} $ for inline, and $$ \ce{2H2 + O2 -> 2H2O} $$ for display.
    - Physical Units (using \pu): $ \pu{10 kg} $ for inline, and $$ \pu{9.8 m/s^2} $$ for display.
 
+   > [!IMPORTANT]
+   > You need to leave a empty space (" ") around $ symbol for md parser to work
+
 6. ONLY ANSWER IN THE LANGUAGE OF **{{{ CHANGE TO DYNAMIC LANGUAGE}}}** in the contents of the card
 7. Prefer making shorter key words or small sentences as answers
 8. If a special user request exists, follow it don't create more than the request
