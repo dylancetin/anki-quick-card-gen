@@ -39,6 +39,7 @@ import {
   openRouterProviders,
   useGlobalSettingsState,
   usePromptState,
+  providerNames,
 } from "@/components/global-settings";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -60,7 +61,7 @@ import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { getDefaultSystemPrompt } from "@/lib/prompt";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export function EditOpenAIConfig({
   openState: [open, setOpen],
@@ -74,13 +75,19 @@ export function EditOpenAIConfig({
         <SheetDescription>
           Buradan Ai-SDK ayarlarını yapabilirsiniz
         </SheetDescription>
-        {open && <SettingsForm closeTab={() => setOpen(false)} />}
+        <SettingsForm closeTab={() => setOpen(false)} open={open} />
       </SheetContent>
     </Sheet>
   );
 }
 
-function SettingsForm({ closeTab }: { closeTab: () => void }) {
+function SettingsForm({
+  closeTab,
+  open,
+}: {
+  closeTab: () => void;
+  open: boolean;
+}) {
   "use no memo";
   const [settingsValue, setSettingsValue] = useGlobalSettingsState();
   const form = useForm<GlobalSettings>({
@@ -92,6 +99,10 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
     control: form.control,
     name: "openrouter.providers",
   });
+
+  useEffect(() => {
+    form.reset(settingsValue);
+  }, [open, settingsValue]);
 
   return (
     <Form {...form}>
@@ -126,13 +137,11 @@ function SettingsForm({ closeTab }: { closeTab: () => void }) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {["openai-compatible", "claude", "groq", "openrouter"].map(
-                    (e) => (
-                      <SelectItem value={e} key={e}>
-                        {e}
-                      </SelectItem>
-                    ),
-                  )}
+                  {providerNames.map((e) => (
+                    <SelectItem value={e} key={e}>
+                      {e}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -4,12 +4,12 @@ import {
   type SetStateAction,
   createContext,
   useContext,
-  useEffect,
 } from "react";
 import { z } from "zod";
 import { getDefaultSystemPrompt } from "@/lib/prompt";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { toast } from "sonner";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export const openRouterProviders = [
   "OpenAI",
@@ -66,6 +66,13 @@ export const openRouterProviders = [
   "Lynn",
   "Reflection",
 ];
+
+export const providerNames = [
+  "openai-compatible",
+  "claude",
+  "groq",
+  "openrouter",
+] as const;
 
 export const globalSettingsSchema = z
   .object({
@@ -133,6 +140,34 @@ export function GlobalSettingsStateProvider({
 
   const promptState = useLocalStorage<string>("system-prompt", () =>
     getDefaultSystemPrompt("TÜRKÇE"),
+  );
+
+  useHotkeys(
+    "c",
+    () => {
+      const i = providerNames.findIndex((e) => e === settings[0].selectedType);
+      let newIndex: number;
+      if (i === -1 || i >= providerNames.length - 1) {
+        newIndex = 0;
+      } else {
+        newIndex = i + 1;
+      }
+      const newProviderName = providerNames[newIndex];
+      const model =
+        newProviderName === "openai-compatible"
+          ? settings[0].model
+          : settings[0][newProviderName]?.model;
+
+      settings[1]((old) => ({
+        ...old,
+        selectedType: newProviderName,
+      }));
+      toast.info(
+        `Provider changed to ${newProviderName.toUpperCase()}, with model set to ${model ?? "(it is not set default value will be used)"}`,
+        { id: "provider-change" },
+      );
+    },
+    [settings[0], settings[1]],
   );
 
   return (
