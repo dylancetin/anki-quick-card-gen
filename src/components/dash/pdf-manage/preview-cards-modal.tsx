@@ -166,9 +166,10 @@ function EditCardComponent({
       if (card.type === "Basic" || card.type === "Type-in") {
         cards[editingRowIndex] = {
           type: card.type,
+          page: card.page,
+          fromPage: card.fromPage,
           front: frontContent,
           back: backContent,
-          page: card.page,
         };
       }
 
