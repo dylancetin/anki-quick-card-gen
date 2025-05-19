@@ -34,11 +34,16 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { Datatable } from "@/components/custom-ui/datatable";
+import { Datatable, MobileCardNav } from "@/components/custom-ui/datatable";
 import { TableNav } from "@/components/custom-ui/datatable";
 import { Updater } from "use-immer";
 import { Textarea } from "@/components/ui/textarea";
-import { RenderMdWithTooltip } from "@/components/custom-ui/render-md-with-tooltip";
+import {
+  RenderMd,
+  RenderMdWithTooltip,
+} from "@/components/custom-ui/render-md-with-tooltip";
+import { Card, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const PREVIEW_PAGE_SIZE = 8;
 
@@ -92,7 +97,7 @@ export function PreviewModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
-        <DialogHeader className="flex justify-between w-full flex-row pr-8 pt-8">
+        <DialogHeader className="flex flex-col md:flex-row justify-between w-full md:pt-8">
           <div className="space-y-4">
             <DialogTitle>Kartları incele ve depoya ekle</DialogTitle>
             <DialogDescription>
@@ -110,8 +115,20 @@ export function PreviewModal({
             Delete All Cards
           </Button>
         </DialogHeader>
-        <Datatable isLoading={false} table={table} columns={columns} />
-        <TableNav table={table} />
+        <Datatable
+          isLoading={false}
+          table={table}
+          columns={columns}
+          className="rounded-md border max-w-full overflow-x-scroll min-h-[528px] hidden md:block"
+        />
+        <TableNav table={table} className="hidden md:block" />
+        <div className="space-y-4 md:hidden">
+          <MobileCardList
+            previewCards={previewCards}
+            inspectRow={inspectRow}
+            setPreviewCards={setPreviewCards}
+          />
+        </div>
         {editDialogOpen ? (
           <EditCardComponent
             editDialogOpen={editDialogOpen}
@@ -125,6 +142,88 @@ export function PreviewModal({
     </Dialog>
   );
 }
+
+const MobileCardList = ({
+  previewCards,
+  inspectRow,
+  setPreviewCards,
+}: {
+  previewCards: PreviewCard[];
+  inspectRow: (rowIndex: number) => void;
+  setPreviewCards: Updater<PreviewCard[]>;
+}) => {
+  const [index, setIndex] = useState(0);
+  const currentCard: PreviewCard | undefined = previewCards?.[index];
+
+  if (!currentCard) {
+    return (
+      <>
+        <Card>Kart Bulunamadı</Card>
+        <MobileCardNav array={previewCards} index={index} setIndex={setIndex} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <div className="mx-auto px-2 py-4 min-h-96 space-y-4">
+          <RenderMd
+            content={currentCard.front}
+            onDoubleClick={() => inspectRow(index)}
+          />
+          {currentCard.type !== "Cloze" ? (
+            <>
+              <Separator />
+              <RenderMd
+                content={currentCard.back}
+                onDoubleClick={() => inspectRow(index)}
+              />
+            </>
+          ) : null}
+        </div>
+        <CardFooter className="justify-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => {
+              inspectRow(index);
+            }}
+            className="w-full"
+          >
+            Düzenle
+          </Button>
+          <Button
+            onClick={() => {
+              if (!currentCard) return;
+              saveToDB(currentCard);
+              setPreviewCards((d) => {
+                d.splice(index, 1);
+              });
+            }}
+            variant="blue"
+            size={"sm"}
+            className="w-full"
+          >
+            Kaydet
+          </Button>
+          <Button
+            onClick={() => {
+              setPreviewCards((d) => {
+                d.splice(index, 1);
+              });
+            }}
+            variant={"destructive"}
+            size={"sm"}
+            className="w-full"
+          >
+            Sil
+          </Button>
+        </CardFooter>
+      </Card>
+      <MobileCardNav array={previewCards} index={index} setIndex={setIndex} />
+    </>
+  );
+};
 
 function EditCardComponent({
   editDialogOpen,

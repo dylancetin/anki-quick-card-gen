@@ -52,70 +52,66 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         <CardTitle>Actions</CardTitle>
       </CardHeader>
       <CardContent className="block space-y-4">
-        <Card>
-          <CardContent className="block space-y-4">
-            <div className="space-y-2 pt-4">
-              <Label className="text-lg block">
-                Number of previous pages to include in context
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min={1}
-                  value={includePagesOffset}
-                  onChange={(e) =>
-                    setIncludePagesOffset(Number.parseInt(e.target.value) || 0)
-                  }
-                  className="w-20"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setIncludePagesOffset(0);
-                  }}
-                >
-                  Reset
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (startCounting) {
-                      setStartCounting(false);
-                      return;
-                    }
-                    setStartCountingPage(currentPage);
-                    setStartCounting(true);
-                  }}
-                >
-                  {!startCounting ? "Start From Current Page" : "Stop"}
-                </Button>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => {
-                  cardGenMutation.mutate({
-                    currentPage,
-                    includePagesOffset,
-                  });
+        <div className="space-y-2 pt-4">
+          <Label className="text-lg block">
+            Number of previous pages to include in context
+          </Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="number"
+              min={1}
+              value={includePagesOffset}
+              onChange={(e) =>
+                setIncludePagesOffset(Number.parseInt(e.target.value) || 0)
+              }
+              className="w-20"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIncludePagesOffset(0);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (startCounting) {
                   setStartCounting(false);
-                  setStartCountingPage(0);
-                  setIncludePagesOffset(0);
-                }}
-              >
-                Create Cards from Current Page
-              </Button>
-              <CreateCardDialog />
-              <RequestCardsDialog
-                cardGenMutation={cardGenMutation}
-                currentPage={currentPage}
-                includePagesOffset={includePagesOffset}
-              />
-            </div>
-          </CardContent>
-        </Card>
+                  return;
+                }
+                setStartCountingPage(currentPage);
+                setStartCounting(true);
+              }}
+            >
+              {!startCounting ? "Start From Current Page" : "Stop"}
+            </Button>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              cardGenMutation.mutate({
+                currentPage,
+                includePagesOffset,
+              });
+              setStartCounting(false);
+              setStartCountingPage(0);
+              setIncludePagesOffset(0);
+            }}
+          >
+            Create Cards from Current Page
+          </Button>
+          <CreateCardDialog />
+          <RequestCardsDialog
+            cardGenMutation={cardGenMutation}
+            currentPage={currentPage}
+            includePagesOffset={includePagesOffset}
+          />
+        </div>
 
         <div className="flex flex-col flex-wrap gap-2">
           <Button

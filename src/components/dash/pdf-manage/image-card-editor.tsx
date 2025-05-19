@@ -147,6 +147,38 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
     });
   };
 
+  const startDrawingMobile = (e: React.TouchEvent<HTMLImageElement>) => {
+    if (!croppedImgRef.current) return;
+
+    // If we're clicking on an existing box, select it instead of drawing
+    const clickedBoxIndex = getBoxAtPosition(e);
+    if (clickedBoxIndex !== null) {
+      setSelectedBoxIndex(clickedBoxIndex);
+      return;
+    }
+
+    // Clear selection when starting to draw a new box
+    setSelectedBoxIndex(null);
+
+    const rect = croppedImgRef.current.getBoundingClientRect();
+    const naturalWidth = croppedImgRef.current.naturalWidth;
+    const naturalHeight = croppedImgRef.current.naturalHeight;
+
+    const scaleX = naturalWidth / rect.width;
+    const scaleY = naturalHeight / rect.height;
+
+    const x = (e.touches[0].clientX - rect.left) * scaleX;
+    const y = (e.touches[0].clientY - rect.top) * scaleY;
+
+    setIsDrawing(true);
+    setCurrentBox({
+      x: x / naturalWidth,
+      y: y / naturalHeight,
+      width: 0,
+      height: 0,
+    });
+  };
+
   const draw = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!isDrawing || !currentBox || !croppedImgRef.current) return;
 
@@ -159,6 +191,27 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
 
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
+
+    setCurrentBox((prev) => ({
+      x: prev!.x,
+      y: prev!.y,
+      width: mouseX / naturalWidth - prev!.x,
+      height: mouseY / naturalHeight - prev!.y,
+    }));
+  };
+
+  const drawMobile = (e: React.TouchEvent<HTMLImageElement>) => {
+    if (!isDrawing || !currentBox || !croppedImgRef.current) return;
+
+    const rect = croppedImgRef.current.getBoundingClientRect();
+    const naturalWidth = croppedImgRef.current.naturalWidth;
+    const naturalHeight = croppedImgRef.current.naturalHeight;
+
+    const scaleX = naturalWidth / rect.width;
+    const scaleY = naturalHeight / rect.height;
+
+    const mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+    const mouseY = (e.touches[0].clientY - rect.top) * scaleY;
 
     setCurrentBox((prev) => ({
       x: prev!.x,
@@ -386,6 +439,9 @@ function PdfCanvas({ pdfDoc, currentPage }: PdfCanvasProps) {
                   onMouseMove={draw}
                   onMouseUp={endDrawing}
                   onMouseLeave={endDrawing}
+                  onTouchStart={startDrawingMobile}
+                  onTouchMove={drawMobile}
+                  onTouchEnd={endDrawing}
                   draggable={false}
                   style={{ cursor: "crosshair" }}
                 />

@@ -70,7 +70,7 @@ export function EditOpenAIConfig({
 }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="overflow-y-scroll w-[448px] sm:w-[600px] sm:max-w-lg">
+      <SheetContent className="overflow-y-scroll w-[448px] sm:w-[600px] max-w-screen">
         <SheetTitle>Hi</SheetTitle>
         <SheetDescription>
           Buradan Ai-SDK ayarlarını yapabilirsiniz
@@ -439,7 +439,7 @@ export function EditPromptConfig({
 }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="overflow-y-scroll w-[448px] sm:w-[600px] sm:max-w-lg">
+      <SheetContent className="overflow-y-scroll w-[448px] sm:w-[600px] max-w-screen">
         <SheetTitle>Hi</SheetTitle>
         <SheetDescription>
           Buradan sistem prompt ayarlarını yapabilirsiniz

@@ -42,7 +42,7 @@ function HomeComponent() {
           <div className="mx-auto max-w-200 space-y-4">
             <Card>
               <CardHeader>
-                <div className="flex justify-between w-full">
+                <div className="flex flex-col sm:flex-row gap-2 justify-between w-full">
                   <CardTitle>Yeni PDF Ekle</CardTitle>
                   <div className="flex items-center gap-2">
                     Save PDF for later sessions{" "}

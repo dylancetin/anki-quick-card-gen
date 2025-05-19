@@ -19,7 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -118,11 +118,17 @@ export const Datatable = ({ isLoading, table, columns, className }: Props) => {
   );
 };
 
-export const TableNav = ({ table }: { table: TanstackTableType<any> }) => {
+export const TableNav = ({
+  table,
+  className,
+}: {
+  table: TanstackTableType<any>;
+  className?: string;
+}) => {
   const { pagination } = table.getState();
   const maxPage = Math.ceil(table.getRowCount() / pagination.pageSize);
   return (
-    <div className="flex justify-end">
+    <div className={"flex justify-center sm:justify-end " + className}>
       <div className="mt-4 flex items-center justify-end gap-4">
         <Button
           variant="outline"
@@ -171,6 +177,74 @@ export const TableNav = ({ table }: { table: TanstackTableType<any> }) => {
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export const MobileCardNav = <T extends any[]>({
+  array,
+  index,
+  setIndex,
+  className,
+}: {
+  array: T;
+  index: number;
+  setIndex: Dispatch<SetStateAction<number>>;
+  className?: string;
+}) => {
+  const maxPage = array.length;
+  return (
+    <div className={cn("flex justify-center sm:justify-end", className)}>
+      <div className="mt-4 flex items-center justify-end gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIndex((e) => e - 1)}
+          disabled={index === 0}
+        >
+          Previous
+        </Button>
+        <Popover>
+          <PopoverTrigger>
+            <span className="text-light align-middle text-sm text-bw-600">
+              {`Sayfa ${index + 1} / ${maxPage}`}
+            </span>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-auto space-y-4"
+            align="center"
+            side="top"
+          >
+            <div className="text-bw-600 text-xs ">Sayfa</div>
+            <Input
+              onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                if (event.key === "Enter") {
+                  const inputValue = event.currentTarget.value;
+                  if (inputValue) {
+                    const page = Number(inputValue) - 1;
+                    if (page < maxPage) {
+                      setIndex(page);
+                    } else {
+                      toast.error("Can't find the page", {
+                        description: `The input page cant be bigger than ${maxPage}.`,
+                        duration: 2500,
+                      });
+                    }
+                  }
+                }
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIndex((e) => e + 1)}
+          disabled={index === maxPage - 1}
         >
           Next
         </Button>

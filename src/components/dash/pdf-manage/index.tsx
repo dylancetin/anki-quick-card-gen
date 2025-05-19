@@ -105,7 +105,7 @@ export function ManagePDFDash({
   if (!file) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="flex flex-col items-center w-full min-w-fit">
         <div className="border rounded-sm max-h-[800px] overflow-x-hidden overflow-y-scroll mx-auto w-full max-w-fit relative">
           {loading && (

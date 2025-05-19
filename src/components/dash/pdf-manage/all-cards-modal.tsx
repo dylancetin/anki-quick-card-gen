@@ -33,7 +33,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { Datatable } from "@/components/custom-ui/datatable";
+import { Datatable, MobileCardNav } from "@/components/custom-ui/datatable";
 import { TableNav } from "@/components/custom-ui/datatable";
 import {
   Tooltip,
@@ -43,7 +43,12 @@ import {
 import { useLiveQuery } from "@/hooks/use-live-query";
 import { Textarea } from "@/components/ui/textarea";
 import { DeleteAllButton } from "./delete-all-cards";
-import { RenderMdWithTooltip } from "@/components/custom-ui/render-md-with-tooltip";
+import {
+  RenderMd,
+  RenderMdWithTooltip,
+} from "@/components/custom-ui/render-md-with-tooltip";
+import { Card, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const Markdown = lazy(
   /* webpackPreload: true */ () => import("@/components/markdown"),
@@ -192,7 +197,7 @@ export function AllCards() {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] min-h-[calc(100vh-32px)] overflow-y-scroll block space-y-4">
-        <DialogHeader className="flex justify-between w-full flex-row pr-8 pt-8">
+        <DialogHeader className="flex flex-col md:flex-row justify-between w-full md:pt-8">
           <div className="space-y-4">
             <DialogTitle>All cards on the depot</DialogTitle>
             <DialogDescription>
@@ -207,9 +212,15 @@ export function AllCards() {
           isLoading={false}
           table={table}
           columns={allCardsColumns}
-          className="rounded-md border max-w-full overflow-x-scroll min-h-[528px]"
+          className="rounded-md border max-w-full overflow-x-scroll min-h-[528px] hidden md:block"
         />
-        <TableNav table={table} />
+        <TableNav table={table} className="hidden md:block" />
+        <div className="space-y-4 md:hidden">
+          <MobileCardList
+            dbCards={dbCards ?? []}
+            handleCellDoubleClick={handleCellDoubleClick}
+          />
+        </div>
         <EditCardComponent
           editDialogOpen={editDialogOpen}
           editingRow={editingRow}
@@ -221,6 +232,139 @@ export function AllCards() {
   );
 }
 
+const MobileCardList = ({
+  dbCards,
+  handleCellDoubleClick,
+}: {
+  dbCards: AnkiCard[];
+  handleCellDoubleClick: (
+    rowIndex: AnkiCard,
+    field: "front" | "back" | null,
+  ) => void;
+}) => {
+  const [index, setIndex] = useState(0);
+  const currentCard: AnkiCard | undefined = dbCards?.[index];
+  if (!currentCard) {
+    return (
+      <>
+        <Card>Kart Bulunamadı</Card>
+        <MobileCardNav array={dbCards} index={index} setIndex={setIndex} />
+      </>
+    );
+  }
+
+  const currentCardValue: AnkiCard["value"] = currentCard.value;
+
+  if (currentCardValue.type === "Image Occlusion") {
+    return (
+      <>
+        <Card>
+          <ImageOcclusionCard
+            imageId={currentCardValue.imageId}
+            boxes={currentCardValue.boxes}
+          />
+          <CardFooter className="justify-center gap-2">
+            <Button
+              onClick={async () => {
+                await db.images.delete(currentCardValue.imageId);
+                await db.cards.delete(currentCard.id);
+              }}
+              size={"sm"}
+              variant={"destructive"}
+            >
+              Sil
+            </Button>
+          </CardFooter>
+        </Card>
+        <MobileCardNav array={dbCards} index={index} setIndex={setIndex} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <div className="mx-auto px-2 py-4 min-h-96 space-y-4">
+          <RenderMd
+            content={currentCardValue.front}
+            onDoubleClick={() => handleCellDoubleClick(currentCard, null)}
+          />
+          {currentCardValue.type !== "Cloze" ? (
+            <>
+              <Separator />
+              <RenderMd
+                content={currentCardValue.back}
+                onDoubleClick={() => handleCellDoubleClick(currentCard, null)}
+              />
+            </>
+          ) : null}
+        </div>
+        <CardFooter className="justify-center gap-2">
+          <Button
+            size="sm"
+            variant="blue"
+            onClick={() => {
+              handleCellDoubleClick(currentCard, null);
+            }}
+          >
+            Düzenle
+          </Button>
+          <Button
+            onClick={async () => {
+              await db.cards.delete(currentCard.id);
+            }}
+            size={"sm"}
+            variant={"destructive"}
+          >
+            Sil
+          </Button>
+        </CardFooter>
+      </Card>
+      <MobileCardNav array={dbCards} index={index} setIndex={setIndex} />
+    </>
+  );
+};
+
+export const ImageOcclusionCard = ({
+  imageId,
+  boxes,
+}: {
+  imageId: string;
+  boxes: Array<{ x: number; y: number; width: number; height: number }>;
+}) => {
+  const image = useLiveQuery(() => db.images.get(imageId));
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  return (
+    <div className="relative inline-block max-w-full mx-2 my-4">
+      {image && (
+        <div className="relative">
+          <img
+            ref={imgRef}
+            src={image.image}
+            alt="Occlusion preview"
+            className="w-96 max-h-[500px] object-contain"
+          />
+          {/* Boxes container */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            {boxes.map((box, index) => (
+              <div
+                key={index}
+                className="absolute bg-red-500/80 pointer-events-none"
+                style={{
+                  left: `${box.x * 100}%`,
+                  top: `${box.y * 100}%`,
+                  width: `${box.width * 100}%`,
+                  height: `${box.height * 100}%`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 export const ImageOcclusionPreview = ({
   imageId,
   boxes,

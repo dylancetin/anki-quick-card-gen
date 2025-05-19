@@ -38,3 +38,19 @@ export function RenderMdWithTooltip({
     </Tooltip>
   );
 }
+
+export function RenderMd({
+  content,
+  onDoubleClick,
+}: {
+  content: string;
+  onDoubleClick?: () => void;
+}) {
+  return (
+    <div className="max-w-96 cursor-pointer" onDoubleClick={onDoubleClick}>
+      <Suspense fallback={"loading..."}>
+        <Markdown content={content} />
+      </Suspense>
+    </div>
+  );
+}
