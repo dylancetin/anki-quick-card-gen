@@ -373,6 +373,46 @@ function useColumns({
         },
       },
       {
+        header: "Aksiyonlar",
+        cell: ({ row }) => {
+          return (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  inspectRow(row.index);
+                }}
+              >
+                Düzenle
+              </Button>
+              <Button
+                onClick={() => {
+                  saveToDB(row.original);
+                  setPreviewCards((d) => {
+                    d.splice(row.index, 1);
+                  });
+                }}
+                variant="blue"
+                size={"sm"}
+              >
+                Kaydet
+              </Button>
+              <Button
+                onClick={() => {
+                  setPreviewCards((d) => {
+                    d.splice(row.index, 1);
+                  });
+                }}
+                variant={"destructive"}
+                size={"sm"}
+              >
+                Sil
+              </Button>
+            </div>
+          );
+        },
+      },
+      {
         header: "Ön-Yüz",
         cell: ({ row }) => {
           if (
@@ -418,46 +458,6 @@ function useColumns({
             doTruncate={row.index % PREVIEW_PAGE_SIZE !== 0}
           />
         ),
-      },
-      {
-        header: "Aksiyonlar",
-        cell: ({ row }) => {
-          return (
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => {
-                  inspectRow(row.index);
-                }}
-              >
-                Düzenle
-              </Button>
-              <Button
-                onClick={() => {
-                  saveToDB(row.original);
-                  setPreviewCards((d) => {
-                    d.splice(row.index, 1);
-                  });
-                }}
-                variant="blue"
-                size={"sm"}
-              >
-                Kaydet
-              </Button>
-              <Button
-                onClick={() => {
-                  setPreviewCards((d) => {
-                    d.splice(row.index, 1);
-                  });
-                }}
-                variant={"destructive"}
-                size={"sm"}
-              >
-                Sil
-              </Button>
-            </div>
-          );
-        },
       },
     ],
     [setPreviewCards, inspectRow],
