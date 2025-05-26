@@ -37,6 +37,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@oneidentity/zstd-js": "^1.0.3",
     "@openrouter/ai-sdk-provider": "^0.4.6",
+    "@radix-ui/react-context-menu": "^2.2.15",
     "@rsbuild/plugin-node-polyfill": "^1.3.0",
     "@tanstack/react-query": "^5.76.2",
     "@tanstack/react-router": "^1.120.7",
