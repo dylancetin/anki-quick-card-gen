@@ -1,0 +1,24 @@
+.card {
+	font-family: arial;
+	font-size: 20px;
+	color: black;
+	background-color: white;
+}
+table,
+th,
+td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+#front,
+#back,
+#extra {
+	visibility: hidden;
+}
+pre code {
+	background-color: #eee;
+	border: 1px solid #999;
+	display: block;
+	padding: 20px;
+	overflow: auto;
+}
