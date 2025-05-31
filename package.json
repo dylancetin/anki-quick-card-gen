@@ -73,6 +73,9 @@
     "sql.js": "1.13.0",
     "tailwind-merge": "^3.3.0",
     "use-immer": "^0.11.0",
+    "workbox-expiration": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
     "zod": "^3.25.23"
   }
 }

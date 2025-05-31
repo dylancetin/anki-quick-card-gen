@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "lib": [
+      "webworker",
+      "es2020"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
@@ -9,9 +13,14 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "baseUrl": ".",
-    "types": ["@rspack/core/module","pdfjs-dist"],
+    "types": [
+      "@rspack/core/module",
+      "pdfjs-dist"
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   }
 }

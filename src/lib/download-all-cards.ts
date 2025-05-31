@@ -6,7 +6,6 @@ import {
   ImageOcclusionCard,
   TypeInCard,
 } from "./db";
-import JSZip from "jszip";
 import initSqlJs, { Database } from "sql.js";
 import { colTableValues, newDeck } from "./anki-db-values";
 
@@ -461,7 +460,8 @@ async function packageAndDownload(
   const dbBuffer = sqlDb.export();
 
   // Create a zip file
-  const zip = new JSZip();
+  const jsZipImport = await import("jszip");
+  const zip = new jsZipImport.default();
 
   // Add the SQLite database to the zip
   zip.file("collection.anki21", new Uint8Array(dbBuffer));

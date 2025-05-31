@@ -16,6 +16,22 @@ declare module "@tanstack/react-router" {
   }
 }
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/service-worker.js") // Make sure this path is correct
+      .then((registration) => {
+        console.log(
+          "Service Worker registered with scope:",
+          registration.scope,
+        );
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed:", error);
+      });
+  });
+}
+
 const rootElement = document.getElementById("app")!;
 
 if (!rootElement.innerHTML) {

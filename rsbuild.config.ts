@@ -89,7 +89,6 @@ export default defineConfig({
     assetsInclude: (name) => {
       if (name.includes("node_modules")) return false;
       if (name.includes("src/lib/htmls")) return true;
-      console.log(name);
       return /\.(md)$/.test(name);
     },
   },
