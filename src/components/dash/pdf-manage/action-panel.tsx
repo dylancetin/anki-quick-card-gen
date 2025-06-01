@@ -9,7 +9,7 @@ import { PdfCanvasDialog } from "./image-card-editor";
 import { CreateCardDialog } from "./create-card-dialog";
 import { DownloadAllButton } from "./download-all-dialog";
 import { Input } from "@/components/ui/input";
-import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage-new";
+import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage";
 import { useCardGeneration } from "@/hooks/use-card-generation";
 import { RequestCardsDialog } from "./user-request-card-gen-dialog";
 import { AllCards } from "./all-cards-modal";
