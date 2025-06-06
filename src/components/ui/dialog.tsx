@@ -109,6 +109,16 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
+export const isAnyDialogOpen = () => {
+  const dialog = document.querySelector("div[role='dialog']");
+  return !!dialog;
+};
+
+export const getOpenDialogCount = () => {
+  const dialog = document.querySelectorAll("div[role='dialog']");
+  return dialog.length;
+};
+
 export {
   Dialog,
   DialogPortal,

@@ -5,6 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function PaginationButtons({
@@ -27,6 +28,9 @@ export function PaginationButtons({
       setCurrentPage(currentPage + 1);
     }
   };
+
+  useHotkeys("h", goToPreviousPage);
+  useHotkeys("l", goToNextPage);
 
   return (
     <div className="mt-4 flex gap-4">

@@ -16,6 +16,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
+  getOpenDialogCount,
+  isAnyDialogOpen,
 } from "@/components/ui/dialog";
 import {
   ColumnDef,
@@ -44,21 +47,19 @@ import {
 } from "@/components/custom-ui/render-md-with-tooltip";
 import { Card, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const PREVIEW_PAGE_SIZE = 8;
 
 export function PreviewModal({
-  open,
-  setOpen,
   previewCards,
   setPreviewCards,
 }: {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
   previewCards: PreviewCard[];
   setPreviewCards: Updater<PreviewCard[]>;
 }) {
   // State for the edit dialog
+  const [open, setOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
@@ -94,8 +95,40 @@ export function PreviewModal({
     },
   });
 
+  useHotkeys("p", () => {
+    if (!isAnyDialogOpen()) setOpen(true);
+  });
+
+  useHotkeys("d", () => {
+    if (getOpenDialogCount() !== 1 || !open) return;
+    const row = previewCards[0];
+    if (!row) return;
+    setPreviewCards((d) => {
+      d.splice(0, 1);
+    });
+  });
+
+  useHotkeys("w", () => {
+    if (getOpenDialogCount() !== 1 || !open) return;
+    const row = previewCards[0];
+    if (!row) return;
+    saveToDB(row);
+    setPreviewCards((d) => {
+      d.splice(0, 1);
+    });
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          onClick={() => setOpen(true)}
+          className="w-full"
+          variant={"purple"}
+        >
+          Open Preview Table
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-32px)] w-[calc(100vw-32px)] h-[calc(100vh-32px)] block space-y-4">
         <DialogHeader className="flex flex-col md:flex-row justify-between w-full md:pt-8">
           <div className="space-y-4">

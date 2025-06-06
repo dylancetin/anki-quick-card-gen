@@ -10,6 +10,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useHotkeys } from "react-hotkeys-hook";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
@@ -112,6 +113,14 @@ export function ManagePDFDash({
       { once: true },
     );
   };
+
+  useHotkeys(["k", "j"], (e) => {
+    const parent = canvasRef.current?.parentElement;
+    if (parent) {
+      const change = e.key === "j" ? 120 : -120;
+      parent.scrollTop = parent.scrollTop + change;
+    }
+  });
 
   if (!file) return null;
 

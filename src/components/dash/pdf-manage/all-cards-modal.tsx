@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  isAnyDialogOpen,
 } from "@/components/ui/dialog";
 import {
   ColumnDef,
@@ -49,6 +50,7 @@ import {
 } from "@/components/custom-ui/render-md-with-tooltip";
 import { Card, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const Markdown = lazy(
   /* webpackPreload: true */ () => import("@/components/markdown"),
@@ -58,6 +60,7 @@ const ALL_CARDS_PAGE_SIZE = 8;
 
 export function AllCards() {
   "use no memo";
+  const [open, setOpen] = useState(false);
   const dbCards = useLiveQuery(() => db.cards.reverse().toArray());
 
   // State for the edit dialog
@@ -75,6 +78,10 @@ export function AllCards() {
     },
     [setEditDialogOpen, setEditFocusField, setEditingRow],
   );
+
+  useHotkeys("a", () => {
+    if (!isAnyDialogOpen()) setOpen(true);
+  });
 
   const allCardsColumns: ColumnDef<AnkiCard>[] = useMemo(
     () => [
@@ -183,7 +190,7 @@ export function AllCards() {
     },
   });
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       {/* prefetch markdown */}
       <div className="hidden" aria-hidden>
         <Suspense fallback={""}>

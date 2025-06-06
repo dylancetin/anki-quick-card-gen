@@ -13,6 +13,7 @@ import { useImmerLocalStorage } from "@/hooks/use-immer-local-storage";
 import { useCardGeneration } from "@/hooks/use-card-generation";
 import { RequestCardsDialog } from "./user-request-card-gen-dialog";
 import { AllCards } from "./all-cards-modal";
+import { useHotkeys } from "react-hotkeys-hook";
 
 interface ActionsPanelProps {
   pdfDoc: PDFDocumentProxy | null;
@@ -20,11 +21,19 @@ interface ActionsPanelProps {
 }
 
 export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
-  const [openPreview, setOpenPreview] = useState(false);
-
   const [includePagesOffset, setIncludePagesOffset] = useState<number>(0);
+
   const [startCounting, setStartCounting] = useState(false);
   const [startCountingPage, setStartCountingPage] = useState(0);
+  const toggleStartCounting = () => {
+    if (startCounting) {
+      setStartCounting(false);
+      return;
+    }
+    setStartCountingPage(currentPage);
+    setStartCounting(true);
+  };
+
   useEffect(() => {
     if (!startCounting) return;
     const diff = currentPage - startCountingPage;
@@ -39,15 +48,10 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
   );
 
   const cardGenMutation = useCardGeneration({ pdfDoc, setPreviewCards });
+  useHotkeys("q", toggleStartCounting);
 
   return (
     <Card>
-      <PreviewModal
-        open={openPreview}
-        setOpen={setOpenPreview}
-        previewCards={previewCards}
-        setPreviewCards={setPreviewCards}
-      />
       <CardHeader>
         <CardTitle>Actions</CardTitle>
       </CardHeader>
@@ -75,18 +79,7 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
             >
               Reset
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (startCounting) {
-                  setStartCounting(false);
-                  return;
-                }
-                setStartCountingPage(currentPage);
-                setStartCounting(true);
-              }}
-            >
+            <Button variant="outline" size="sm" onClick={toggleStartCounting}>
               {!startCounting ? "Start From Current Page" : "Stop"}
             </Button>
           </div>
@@ -114,13 +107,10 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
         </div>
 
         <div className="flex flex-col flex-wrap gap-2">
-          <Button
-            onClick={() => setOpenPreview(true)}
-            className="w-full"
-            variant={"purple"}
-          >
-            Open Preview Table
-          </Button>
+          <PreviewModal
+            previewCards={previewCards}
+            setPreviewCards={setPreviewCards}
+          />
           <PdfCanvasDialog pdfDoc={pdfDoc} currentPage={currentPage} />
           <AllCards />
           <DownloadAllButton />
