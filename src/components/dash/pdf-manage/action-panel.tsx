@@ -49,6 +49,15 @@ export function ActionsPanel({ pdfDoc, currentPage }: ActionsPanelProps) {
 
   const cardGenMutation = useCardGeneration({ pdfDoc, setPreviewCards });
   useHotkeys("q", toggleStartCounting);
+  useHotkeys("Enter", () => {
+    cardGenMutation.mutate({
+      currentPage,
+      includePagesOffset,
+    });
+    setStartCounting(false);
+    setStartCountingPage(0);
+    setIncludePagesOffset(0);
+  });
 
   return (
     <Card>
