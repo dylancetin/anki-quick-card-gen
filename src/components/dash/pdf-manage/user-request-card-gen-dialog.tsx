@@ -78,7 +78,6 @@ export function RequestCardsDialog({
                   includePagesOffset,
                   userRequest: data.userRequest,
                 });
-                form.reset();
                 setOpen(false);
               },
               (e) => {
