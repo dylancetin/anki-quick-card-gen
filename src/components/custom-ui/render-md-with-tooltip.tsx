@@ -22,7 +22,7 @@ export function RenderMdWithTooltip({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`${doTruncate ? "truncate **:truncate" : "text-wrap"} max-w-96 cursor-pointer`}
+          className={`${doTruncate ? "truncate **:truncate max-h-14 overflow-y-scroll" : "text-wrap"} max-w-96 cursor-pointer`}
           onDoubleClick={onDoubleClick}
         >
           <Suspense fallback={"loading..."}>
