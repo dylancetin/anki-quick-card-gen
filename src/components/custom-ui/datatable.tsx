@@ -49,14 +49,17 @@ export const Datatable = ({ isLoading, table, columns, className }: Props) => {
     }
 
     if (currentPage === 0 || firstLoad.current) {
-      tableRef.current.style.minHeight = `${h}px`;
+      tableRef.current.style.height = `${h}px`;
       firstLoad.current = false;
     }
   }, [tableRef, isLoading, firstLoad]);
 
   return (
     <div
-      className={cn("rounded-md border max-w-full min-h-[432px]", className)}
+      className={cn(
+        "rounded-md border max-w-full min-h-[432px] max-h-[75vh]",
+        className,
+      )}
       ref={tableRef}
     >
       {isLoading ? (
