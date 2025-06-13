@@ -483,8 +483,10 @@ async function packageAndDownload(
 
   // Generate the zip file and trigger download
   const blob = await zip.generateAsync({ type: "blob" });
+  const apkgBlob = new Blob([blob], { type: "application/apkg" });
+
   const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(apkgBlob);
   link.href = url;
   link.download = `${deckName}-anki-cards.apkg`;
   document.body.appendChild(link);
