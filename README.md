@@ -10,8 +10,4 @@ You can generate Image-Cloze cards
 
 i use this, if you want to use this u prob need to fork it
 
-When you download the final cards.zip
-
-You need to put the images in [https://docs.ankiweb.net/files.html#file-locations](https://docs.ankiweb.net/files.html#file-locations)
-
-Then import the cards.txt to the deck you please
+you dont need to do anything special app gives you an ankipkg which helps to instantly add images and the cards to your anki
